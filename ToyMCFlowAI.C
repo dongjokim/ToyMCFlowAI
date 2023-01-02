@@ -35,8 +35,7 @@ int main(int argc, char **argv)
 		cout << endl << endl;
 		exit(1);
 	}
-
-    // CONSTANT
+    // Arguments 
 	char *outFile = argv[1];
 	Int_t Nevt= atoi(argv[2]);
 	Int_t random_seed = atoi(argv[3]);
@@ -44,16 +43,13 @@ int main(int argc, char **argv)
 	Int_t bNUE = atoi(argv[5]); //if bNUE = false = 0, uses the uniform acceptance for sampling
 	// Declare variables
 	cout<< strCentrality[0]<<endl;
-
-
 	TFile *fOutRoot = new TFile(outFile, "RECREATE");
 	TClonesArray *event = new TClonesArray("JBaseEventHeader",1000);
 	TClonesArray *tracks = new TClonesArray("JBaseTrack",1000);
     TTree *jTree = new TTree("jTree","Tree from ToyMC");
     jTree->Branch("JTrackList",&tracks);
     jTree->Branch("JEventHeaderList",&event);
-	double px=-1, py=-1, pz=-1, E=-1, mass = 0.139;
-
+	
 	//Define uniform function for sampling centrality
 	TF1 *centSamp = new TF1("centSamp", "[0]",0.0,0.9);
 	centSamp->SetParameter(0,1.0);
@@ -75,7 +71,7 @@ int main(int argc, char **argv)
 
     JFlowAnalysis *jflowana = new JFlowAnalysis();
     jflowana->RegisterHistos(jhisto);
-//-----------------------------Generating pdfs--------------------------------------
+    //-----------------------------Generating pdfs--------------------------------------
 	//signal
 	TString strformula = "[0]*(1";
 	for (Int_t ih=0; ih<NH; ih++){
@@ -99,7 +95,6 @@ int main(int argc, char **argv)
 	//-------Random number needed for sampling
 	TRandom3 *prng = new TRandom3(random_seed);
 	gRandom->SetSeed(random_seed);
-	
 	//---------------------------End of generating pdfs-------------------------------------
 	int ieout = Nevt/20;
 	if (ieout<1) ieout=1;
@@ -110,12 +105,12 @@ int main(int argc, char **argv)
 	Int_t ic=0;
 	Double_t cent = -999; // for centrality
 	Int_t Nch=0, N_bg=0;
+	double px=-1, py=-1, pz=-1, E=-1, mass = 0.139;
     double phi = -999., eta = -999., pt  = -999.;
 	//Eventloop to fill hSample
 	for (Int_t iEvent=0; iEvent<Nevt; iEvent++) {
 		event->Clear(); tracks->Clear(); phiarray.clear(); phiarrayWeight.clear();
 		if(iEvent % ieout == 0) { cout << iEvent << "\t" << int(float(iEvent)/Nevt*100) << "%" << endl ;}
-
         JBaseEventHeader *hdr = new( (*event)[event->GetEntriesFast()] ) JBaseEventHeader;
         hdr->SetEventID(iEvent);
 		//--------Sample randomly from centSamp---------
