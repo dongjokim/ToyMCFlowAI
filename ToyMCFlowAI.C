@@ -24,6 +24,7 @@
 const double kEtaMax = 0.8;
 void NormalizeSample(TH1D *hist); //to normalize the inclusive phi histo to match fNUE
 bool b2holes = 1; //1=two holes, 0=1 hole
+Int_t GetCentralityBin( double dice);
 
 int main(int argc, char **argv)
 {
@@ -51,11 +52,7 @@ int main(int argc, char **argv)
     TTree *jTree = new TTree("jTree","Tree from ToyMC");
     jTree->Branch("JTrackList",&tracks);
     jTree->Branch("JEventHeaderList",&event);
-	double px=-1;
-	double py=-1;
-	double pz=-1;
-	double E=-1;
-	double mass = 0.139; // pizero mass
+	double px=-1, py=-1, pz=-1, E=-1, mass = 0.139;
 
 	//Define uniform function for sampling centrality
 	TF1 *centSamp = new TF1("centSamp", "[0]",0.0,0.9);
@@ -67,7 +64,7 @@ int main(int argc, char **argv)
 		uniform[ih]->SetParameter(0,1.);
 	}
 	// pizero spectra from pythia event generator->Levy Para
-	double lpt = 2, upt = 70;
+	double lpt = 0.15, upt = 70;
 	double par_Lpi14tev_pythia[3] = {2.62912e+04, 6.17808e+00, 5.26791e+00};
 	TF1 *Lpi14tev_pythia = new TF1("Lpi14tev_pythia","[0]*exp(-[2]/x)/pow(x,[1])",lpt, upt);
 	for(int i=0;i<3;i++) Lpi14tev_pythia->SetParameter(i,par_Lpi14tev_pythia[i]);
@@ -86,7 +83,6 @@ int main(int argc, char **argv)
 	}
 	strformula+=")";
 	cout<<strformula<<endl;
-
 	TF1 *fourier = new TF1("Fourier", strformula, 0.0, 2.0*TMath::Pi());
 	//background
 	TF1 *bgUniform = new TF1("bgUniform","[0]",0.0, 2.0*TMath::Pi());
@@ -110,31 +106,27 @@ int main(int argc, char **argv)
 	TStopwatch timer;
 	timer.Start();
 	Double_t Psi_n[NH]={0.0};// symmetry plane angles for each n
-	vector <double> phiarray; //pharray is now vector
-	vector <double> phiarrayWeight; //pharray is now vector
+	vector <double> phiarray, phiarrayWeight; //pharray is now vector
+	Int_t ic=0;
+	Double_t cent = -999; // for centrality
+	Int_t Nch=0, N_bg=0;
+    double phi = -999., eta = -999., pt  = -999.;
 	//Eventloop to fill hSample
-	for (Int_t iEvent=0; iEvent<Nevt; iEvent++)
-	{
-		event->Clear();
-        tracks->Clear();
-        phiarray.clear();
-        phiarrayWeight.clear();
+	for (Int_t iEvent=0; iEvent<Nevt; iEvent++) {
+		event->Clear(); tracks->Clear(); phiarray.clear(); phiarrayWeight.clear();
+		if(iEvent % ieout == 0) { cout << iEvent << "\t" << int(float(iEvent)/Nevt*100) << "%" << endl ;}
+
         JBaseEventHeader *hdr = new( (*event)[event->GetEntriesFast()] ) JBaseEventHeader;
         hdr->SetEventID(iEvent);
-		if(iEvent % ieout == 0) { cout << iEvent << "\t" << int(float(iEvent)/Nevt*100) << "%" << endl ;}
 		//--------Sample randomly from centSamp---------
-		Double_t dice = centSamp->GetRandom();
-		Int_t Nch=0;
-		Int_t ic=0;
-		if(dice>= 0.0 && dice<0.3) ic=0;
-		if(dice>=0.3 && dice<0.6) ic=1;
-		if(dice>=0.6 && dice<=0.9) ic=2;
-		
-		//-----------End of random sampling of centrality-------------
+		cent = centSamp->GetRandom(); hdr->SetCentrality(cent);
+		ic = GetCentralityBin(cent);
+    	//-----------End of random sampling of centrality-------------
 		jhisto->hCentSample->Fill(ic);
 		Nch=inputNch[ic];
 		//Get Psi for different harmonics
 		for (Int_t n=0; n<NH; n++) Psi_n[n]=uniform[n]->GetRandom();//harmonic loop
+		// Event information for jflowana
 		jflowana->SetCentBin(ic);
 		jflowana->SetSymmetryPlanes(Psi_n);
 		// Setting parameter values of pdf
@@ -145,33 +137,26 @@ int main(int argc, char **argv)
 		for (Int_t i=NH; i<2*NH; i++){
 			fourier->SetParameter(i+1,Psi_n[i-NH]); //Setting the Psi parameters
 		}
-
-		if(iEvent<NPhiHist){
-			fourier->Write(Form("fourierE%02d",iEvent));
-		}
-		
-		double phi = -999.;
-		double eta = -999.;
-		double pt  = -999.;
+		if(iEvent<NPhiHist){ fourier->Write(Form("fourierE%02d",iEvent));}
+		//Signal
 		for (Int_t t=0; t<Nch; t++){
 			phi=fourier->GetRandom();
 			if(prng->Uniform(0,1) > fNUE->Eval(phi,0,0))//For a 1-d function give y=0 and z=0 
 				continue;
 			phiarray.push_back(phi); // generating signal
 		}
-		Int_t N_bg = Nch*bgfrac;
+		//Background
+		N_bg = Nch*bgfrac;
 		for (Int_t t=0; t<N_bg; t++){ //generating background
 			phi = bgUniform->GetRandom();
 			if(prng->Uniform(0,1) > fNUE->Eval(phi,0,0))//For a 1-d function give y=0 and z=0 
 				continue;
 			phiarray.push_back(phi); // if bNUE'is kTRUE
-			if(iEvent<NPhiHist){
-				jhisto->hBGEvent[iEvent]->Fill(phi);
-			}
+			if(iEvent<NPhiHist){ jhisto->hBGEvent[iEvent]->Fill(phi); }
 			jhisto->hBgPhi->Fill(phi);
 		}
-		Int_t N_tot = phiarray.size();
-		for (Int_t t=0; t<N_tot; t++){ 
+		// Signal + background
+		for (Int_t t=0; t<phiarray.size(); t++){ 
 			jhisto->hSample->Fill(phiarray[t]); //fill hSample with phiarray following shape of fNUE
 			jhisto->hSignalPhi->Fill(phiarray[t]); 
 			if(iEvent<NPhiHist){
@@ -181,16 +166,13 @@ int main(int argc, char **argv)
 			jhisto->hInclusivePhi->Fill(phiarray[t]);
 			eta  = prng->Uniform(-kEtaMax, kEtaMax);//generate bg flat in eta
 			pt = Lpi14tev_pythia->GetRandom();;
-			px = pt*cos(phiarray[t]);
-			py = pt*sin(phiarray[t]);
-			pz = pt*sinh(eta);
+			px = pt*cos(phiarray[t]); py = pt*sin(phiarray[t]); pz = pt*sinh(eta);
 			E = sqrt(mass*mass+px*px+py*py+pz*pz);
 			new ( (*tracks)[t] )TLorentzVector(px, py, pz, E);
 		}
 		jflowana->Run(phiarray, phiarrayWeight);
-		// 
-	}// End of first event loop
-	jTree->Fill(); // fill last event
+		jTree->Fill(); // fill event
+	}// End of event loop
 	NormalizeSample(jhisto->hSample); 
 	fNUE->Write("fNUE");
 	fOutRoot->Write();
@@ -198,7 +180,6 @@ int main(int argc, char **argv)
 	cout <<"Successfully finished."<<endl;
 	timer.Print();
 }
-
 //depending on the shape of the histo, this may need to be changed
 void NormalizeSample(TH1D *hist)
 {
@@ -207,4 +188,12 @@ void NormalizeSample(TH1D *hist)
 		double yav =  2.0*hist->Integral(binxmin,binxmax)/binxmax;
 		hist->Scale(1/yav);
 		return;
+}
+Int_t GetCentralityBin( double dice) {
+	Int_t ic = -1;
+	if(dice>= 0.0 && dice<0.3) ic=0;
+	if(dice>=0.3 && dice<0.6) ic=1;
+	if(dice>=0.6 && dice<=0.9) ic=2;
+
+	return ic;
 }
