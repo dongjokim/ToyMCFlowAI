@@ -21,6 +21,22 @@
 #include "src/JHistos.h"
 #include "src/JFlowAnalysis.h"
 
+// CINT does not understand some files included by LorentzVector
+#ifndef __CINT__
+#include "Math/Vector3D.h"
+#include "Math/Vector4D.h"
+#include "ROOT/RVec.hxx"
+#include <ROOT/RDataFrame.hxx>
+
+using namespace ROOT::Math;
+using namespace ROOT; // RDataFrame's namespace
+using FourVector = ROOT::Math::XYZTVector;
+using FourVectorVec = std::vector<FourVector>;
+using FourVectorRVec = ROOT::VecOps::RVec<FourVector>;
+using CylFourVector = ROOT::Math::RhoEtaPhiVector;
+
+#endif
+
 const double kEtaMax = 0.8;
 void NormalizeSample(TH1D *hist); //to normalize the inclusive phi histo to match fNUE
 bool b2holes = 1; //1=two holes, 0=1 hole
@@ -49,7 +65,9 @@ int main(int argc, char **argv)
     TTree *jTree = new TTree("jTree","Tree from ToyMC");
     jTree->Branch("JTrackList",&tracks);
     jTree->Branch("JEventHeaderList",&event);
+	TTree *vTree = new TTree("vTree","vTree from ToyMC");
 	
+	ROOT::RDataFrame df(64);
 	//Define uniform function for sampling centrality
 	TF1 *centSamp = new TF1("centSamp", "[0]",0.0,0.9);
 	centSamp->SetParameter(0,1.0);
@@ -151,22 +169,33 @@ int main(int argc, char **argv)
 			jhisto->hBgPhi->Fill(phi);
 		}
 		// Signal + background
-		for (Int_t t=0; t<phiarray.size(); t++){ 
-			jhisto->hSample->Fill(phiarray[t]); //fill hSample with phiarray following shape of fNUE
-			jhisto->hSignalPhi->Fill(phiarray[t]); 
-			if(iEvent<NPhiHist){
-				jhisto->hTruthEvent[iEvent]->Fill(phiarray[t]);
-				jhisto->hPhiEvent[iEvent]->Fill(phiarray[t]);
-			}
-			jhisto->hInclusivePhi->Fill(phiarray[t]);
-			eta  = prng->Uniform(-kEtaMax, kEtaMax);//generate bg flat in eta
-			pt = Lpi14tev_pythia->GetRandom();;
-			px = pt*cos(phiarray[t]); py = pt*sin(phiarray[t]); pz = pt*sinh(eta);
-			E = sqrt(mass*mass+px*px+py*py+pz*pz);
-			new ( (*tracks)[t] )TLorentzVector(px, py, pz, E);
-		}
+		FourVectorVec vtracks;
+		vtracks.reserve(phiarray.size());
+		auto genTracks = [&](){
+			for (Int_t t=0; t<phiarray.size(); t++){ 
+				jhisto->hSample->Fill(phiarray[t]); //fill hSample with phiarray following shape of fNUE
+				jhisto->hSignalPhi->Fill(phiarray[t]); 
+				if(iEvent<NPhiHist){
+					jhisto->hTruthEvent[iEvent]->Fill(phiarray[t]);
+					jhisto->hPhiEvent[iEvent]->Fill(phiarray[t]);
+				}
+				jhisto->hInclusivePhi->Fill(phiarray[t]);
+				eta  = prng->Uniform(-kEtaMax, kEtaMax);//generate bg flat in eta
+				pt = Lpi14tev_pythia->GetRandom();;
+				px = pt*cos(phiarray[t]); py = pt*sin(phiarray[t]); pz = pt*sinh(eta);
+				E = sqrt(mass*mass+px*px+py*py+pz*pz);
+				new ( (*tracks)[t] )TLorentzVector(px, py, pz, E);
+				CylFourVector vcyl(pt, eta, phiarray[t]);
+         		// set energy
+         		auto E = sqrt(vcyl.R() * vcyl.R() + mass*mass);
+         		// fill track vector
+         		vtracks.emplace_back(vcyl.X(), vcyl.Y(), vcyl.Z(), E);
+         	}
+         	return vtracks;
+		};
 		jflowana->Run(phiarray, phiarrayWeight);
 		jTree->Fill(); // fill event
+   		df.Define("tracks", genTracks).Snapshot<FourVectorVec>("vTree", outFile, {"tracks"});
 	}// End of event loop
 	NormalizeSample(jhisto->hSample); 
 	fNUE->Write("fNUE");
