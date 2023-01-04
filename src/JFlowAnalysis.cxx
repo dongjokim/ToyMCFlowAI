@@ -14,13 +14,10 @@
 #include "JFlowAnalysis.h"
 
 bool calculateTwoP = 1; //1=use 2p method (note: this is a lot slower than the others)
-
 bool useSampleHisto = 0; //0=use fNUE function, 1=use phi histogram for evaluating the correction terms
 using namespace std;
 enum{kK0, kK1, kK2, nKL}; // order
 TComplex QvectorQC[NH][nKL];
-
-
 //______________________________________________________________________________
 JFlowAnalysis::JFlowAnalysis():
 	fTrackList(NULL), 

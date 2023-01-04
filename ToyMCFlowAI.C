@@ -53,14 +53,24 @@ int main(int argc, char **argv)
     // Define some simple structures
     typedef struct {Double_t phi,eta,pt,E,correction;} JTRACKS;
     typedef struct {
-       Int_t ntrack,icent;
+       Int_t event,ntrack,icent;
        Double_t psi_2,psi_3;
     } JEVENT;
     JTRACKS jtracks;
     JEVENT jevent;
 	TTree *vTree = new TTree("vTree","vTree from ToyMC");
-	vTree->Branch("jtracks",&jtracks,"phi/D:eta/D:pt/D:E/D:correction/D");
-    vTree->Branch("jevent",&jevent,"ntrack/I:icent/i:psi_2/D:psi_3/D");
+	//vTree->Branch("jtracks",&jtracks,"phi/D:eta/D:pt/D:E/D:correction/D");
+    //vTree->Branch("jevent",&jevent,"ntrack/I:icent/i:psi_2/D:psi_3/D");
+    vTree->Branch("phi",&jtracks.phi,"phi/D");
+    vTree->Branch("eta",&jtracks.eta,"eta/D");
+    vTree->Branch("pt",&jtracks.pt,"pt/D");
+    vTree->Branch("E",&jtracks.E,"E/D");
+    vTree->Branch("correction",&jtracks.correction,"correction/D");
+    vTree->Branch("event",&jevent.event,"event/I");
+    vTree->Branch("ntrack",&jevent.ntrack,"ntrack/I");
+    vTree->Branch("icent",&jevent.icent,"icent/I");
+    vTree->Branch("psi_2",&jevent.psi_2,"psi_2/D");
+    vTree->Branch("psi_3",&jevent.psi_3,"psi_3/D");
 	//Define uniform function for sampling centrality
 	TF1 *centSamp = new TF1("centSamp", "[0]",0.0,0.9);
 	centSamp->SetParameter(0,1.0);
@@ -162,6 +172,7 @@ int main(int argc, char **argv)
 			jhisto->hBgPhi->Fill(phi);
 		}
 		// Signal + background
+		jevent.event = iEvent;
 		jevent.ntrack = phiarray.size();
 		jevent.icent  = ic;
 		jevent.psi_2  = Psi_n[0];
@@ -185,10 +196,11 @@ int main(int argc, char **argv)
 			jtracks.pt  = pt;
 			jtracks.E   = E;
 			jtracks.correction = 1.0;
+			vTree->Fill();
 		}
 		jflowana->Run(phiarray, phiarrayWeight);
 		jTree->Fill(); // fill event
-		vTree->Fill();
+		
 	}// End of event loop
 	NormalizeSample(jhisto->hSample); 
 	fNUE->Write("fNUE");
