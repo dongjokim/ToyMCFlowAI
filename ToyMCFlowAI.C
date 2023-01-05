@@ -179,8 +179,8 @@ int main(int argc, char **argv)
 		jevent.icent  = ic;
 		jevent.psi_2  = Psi_n[0];
 		jevent.psi_3  = Psi_n[1];
-		jevent.v_2  = inputVn[0][ic];
-		jevent.v_3  = inputVn[1][ic];
+		jevent.v_2  = inputVn[1][ic];
+		jevent.v_3  = inputVn[2][ic];
 
 		for (Int_t t=0; t<phiarray.size(); t++){ 
 			jhisto->hSample->Fill(phiarray[t]); //fill hSample with phiarray following shape of fNUE

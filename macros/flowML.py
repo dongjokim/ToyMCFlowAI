@@ -78,17 +78,17 @@ model.summary()
 model.compile(optimizer='adam', loss='binary_crossentropy', 
               metrics=['accuracy',F1])
 
-df_train =  df[df['event'] < 10]
+df_train =  df[df['icent'] == 1]
 
 X = df_train[['event','phi','eta','pt']].values
 y = df_train[['v_2']].values
 # train/validation
 training = model.fit(X, y, batch_size=32, epochs=100, shuffle=True, verbose=1, validation_split=0.3)
-predictions = (model.predict(X) > 0.5).astype(int)
+predictions = (model.predict(X) > 0.0).astype(int)
 # summarize the first 5 cases
-for i in range(5):
- print('%s => %d (expected %d)' % (X[i].tolist(), predictions[i], y[i]))
- 
+for i in range(20):
+ print('%s => %f (expected %f)' % (X[i].tolist(), predictions[i], y[i]))
+
 def PlotInputEvents(df):
 	xtitle = "$\\eta$"
 	ytitle = "$\\varphi (\\mathrm{rad})$"
