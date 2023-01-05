@@ -15,9 +15,6 @@ import shap
 from tensorflow.keras.utils import plot_model
 #df = px.data.tips()
 
-mux = pd.MultiIndex.from_product([[],[]],names=["event","Entry"]);
-dataPhi = pd.DataFrame(columns=mux);
-
 tree = uproot3.open("../tree_toymcflowAI_bg0NUE0.root")['vTree']
 print(tree.keys())
 #tree.arrays(["phi", "eta", "pt"])
@@ -109,7 +106,5 @@ def PlotInputEvents(df):
 		ax.set_ylabel(ytitle)
 		plt.show()
 		ax.figure.savefig("figs/fig_evt{}.pdf".format(i))  
-
-	#print(dataPhi)
 
 #PlotInputEvents(df)
