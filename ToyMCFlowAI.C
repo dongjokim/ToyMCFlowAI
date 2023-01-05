@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     typedef struct {Double_t phi,eta,pt,E,correction;} JTRACKS;
     typedef struct {
        Int_t event,ntrack,icent;
-       Double_t psi_2,psi_3;
+       Double_t psi_2,psi_3,v_2,v_3;
     } JEVENT;
     JTRACKS jtracks;
     JEVENT jevent;
@@ -71,6 +71,8 @@ int main(int argc, char **argv)
     vTree->Branch("icent",&jevent.icent,"icent/I");
     vTree->Branch("psi_2",&jevent.psi_2,"psi_2/D");
     vTree->Branch("psi_3",&jevent.psi_3,"psi_3/D");
+    vTree->Branch("v_2",&jevent.v_2,"v_2/D");
+    vTree->Branch("v_3",&jevent.v_3,"v_3/D");
 	//Define uniform function for sampling centrality
 	TF1 *centSamp = new TF1("centSamp", "[0]",0.0,0.9);
 	centSamp->SetParameter(0,1.0);
@@ -177,6 +179,8 @@ int main(int argc, char **argv)
 		jevent.icent  = ic;
 		jevent.psi_2  = Psi_n[0];
 		jevent.psi_3  = Psi_n[1];
+		jevent.v_2  = inputVn[0][ic];
+		jevent.v_3  = inputVn[1][ic];
 
 		for (Int_t t=0; t<phiarray.size(); t++){ 
 			jhisto->hSample->Fill(phiarray[t]); //fill hSample with phiarray following shape of fNUE
