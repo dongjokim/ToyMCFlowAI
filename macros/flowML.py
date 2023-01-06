@@ -1,3 +1,4 @@
+import sys, os
 import uproot3
 import ROOT
 import pandas as pd
@@ -13,13 +14,7 @@ import tensorflow as tf
 from tensorflow.keras import models, layers, utils, backend as K
 import shap
 from tensorflow.keras.utils import plot_model
-df = px.data.tips()
 
-tree = uproot3.open("../tree_toymcflowAI_bg0NUE0.root")['vTree']
-print(tree.keys())
-#tree.arrays(["phi", "eta", "pt"])
-df = tree.pandas.df()
-#print(df)
 
 def binary_step_activation(x):
     ##return 1 if x>0 else 0 
@@ -50,51 +45,6 @@ def R2(y, y_hat):
 
 
 
-# build the model
-n_features = 4
-model = models.Sequential(name="DeepNN", layers=[
-    ### hidden layer 1
-    layers.Dense(name="h1", input_dim=n_features,
-                 units=int(round((n_features+1)/2)), 
-                 activation='relu'),
-    layers.Dropout(name="drop1", rate=0.2),
-    
-    ### hidden layer 2
-    layers.Dense(name="h2", units=int(round((n_features+1)/4)), 
-                 activation='relu'),
-    layers.Dropout(name="drop2", rate=0.2),
-
-    ### hidden layer 3
-    layers.Dense(name="h3", units=int(round((n_features+1)/4)), 
-                 activation='relu'),
-    layers.Dropout(name="drop3", rate=0.2),
-
-      ### hidden layer 4
-    layers.Dense(name="h4", units=int(round((n_features+1)/4)), 
-                 activation='relu'),
-    layers.Dropout(name="drop4", rate=0.2),
-
-    ### layer output
-    layers.Dense(name="output", units=1, activation='sigmoid')
-])
-
-model.summary()
-#plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
-
-# compile the neural network
-#model.compile(optimizer='adam', loss='binary_crossentropy', 
-#              metrics=['accuracy',F1])
-
-#df_train =  df[df['icent'] == 1]
-
-#X = df_train[['event','phi','eta','pt']].values
-#y = df_train[['v_2']].values
-# train/validation
-#training = model.fit(X, y, batch_size=32, epochs=100, shuffle=True, verbose=1, validation_split=0.3)
-#predictions = (model.predict(X) > 0.0).astype(int)
-# summarize the first 5 cases
-#for i in range(20):
-# print('%s => %f (expected %f)' % (X[i].tolist(), predictions[i], y[i]))
 
 def PlotInputEvents(df):
 	xtitle = "$\\eta$"
@@ -135,9 +85,8 @@ def PlotInputMLEvents(df,weight):
 		fig.show()
 		fig.write_image	("figs/figML_{}_evt{}.pdf".format(weight,i))  
 
-def PlotInputImagesEvents(df,weight):
+def make_image_event(df,weight):
 	out=[]
-
 	xtitle = "$\\eta$"
 	ytitle = "$\\varphi (\\mathrm{rad})$"
 	for i in range(0,10):
@@ -151,7 +100,26 @@ def PlotInputImagesEvents(df,weight):
 		#fig.write_image	("figs/figML_{}_evt{}.pdf".format(weight,i))     
 	return out, (xedges, yedges)
 
-PlotInputImagesEvents(df,"pt")
+
+if __name__ == "__main__":
+	tree = uproot3.open("../tree_toymcflowAI_bg0NUE0.root")['vTree']
+	print(tree.keys())
+	#tree.arrays(["phi", "eta", "pt"])
+	df = tree.pandas.df()
+	#print(df)
+	outdir = 'images_out/'
+	if not os.path.isdir(outdir): os.system('mkdir {}'.format(outdir))
+	cwd = os.getcwd()
+	allimages = []
+	hhpt, _ = make_image_event(df,"pt")
+	hhmass, _ = make_image_event(df,"mass")
+	hheCM, _ = make_image_event(df,"eCM")
+	allimages.append(hhpt)
+	allimages.append(hhmass)
+	allimages.append(hheCM)
+	np.savez_compressed(outdir+'allimages.npz', allimages)
+
+
 #PlotInputMLEvents(df,"pt")
 #PlotInputMLEvents(df,"mass")
 #PlotInputMLEvents(df,"eCM")
