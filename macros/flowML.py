@@ -135,7 +135,24 @@ def PlotInputMLEvents(df,weight):
 		fig.show()
 		fig.write_image	("figs/figML_{}_evt{}.pdf".format(weight,i))  
 
+def PlotInputImagesEvents(df,weight):
+	out=[]
+
+	xtitle = "$\\eta$"
+	ytitle = "$\\varphi (\\mathrm{rad})$"
+	for i in range(0,10):
+		myevent = df.loc[df['event'] == i]
+		histo, xedges, yedges = np.histogram2d(myevent['eta'].to_numpy(), myevent['phi'].to_numpy(),bins=(32,32),weights=myevent['pt'].to_numpy())
+		### append to output (transpose to have eta=x, phi=y)
+		out.append(histo.T)
+		#print(histo)
+		#plt.imshow(image)
+		#plt.show()
+		#fig.write_image	("figs/figML_{}_evt{}.pdf".format(weight,i))     
+	return out, (xedges, yedges)
+
+PlotInputImagesEvents(df,"pt")
 #PlotInputMLEvents(df,"pt")
-PlotInputMLEvents(df,"mass")
-PlotInputMLEvents(df,"eCM")
+#PlotInputMLEvents(df,"mass")
+#PlotInputMLEvents(df,"eCM")
 #PlotInputEvents(df)
