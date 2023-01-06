@@ -9,41 +9,6 @@ from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
 import seaborn as sns
-# define the function
-import tensorflow as tf
-from tensorflow.keras import models, layers, utils, backend as K
-import shap
-from tensorflow.keras.utils import plot_model
-
-
-def binary_step_activation(x):
-    ##return 1 if x>0 else 0 
-    return K.switch(x>0, tf.math.divide(x,x), tf.math.multiply(x,0))
-
-# define metrics
-def Recall(y_true, y_pred):
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
-    return recall
-
-def Precision(y_true, y_pred):
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
-    return precision
-
-def F1(y_true, y_pred):
-    precision = Precision(y_true, y_pred)
-    recall = Recall(y_true, y_pred)
-    return 2*((precision*recall)/(precision+recall+K.epsilon()))
-
-def R2(y, y_hat):
-    ss_res =  K.sum(K.square(y - y_hat)) 
-    ss_tot = K.sum(K.square(y - K.mean(y))) 
-    return ( 1 - ss_res/(ss_tot + K.epsilon()) )
-
-
 
 
 def PlotInputEvents(df):
@@ -89,10 +54,11 @@ def make_image_event(df,weight):
 	out=[]
 	xtitle = "$\\eta$"
 	ytitle = "$\\varphi (\\mathrm{rad})$"
-	for i in range(0,10):
+	for i in range(0,100):
 		myevent = df.loc[df['event'] == i]
-		histo, xedges, yedges = np.histogram2d(myevent['eta'].to_numpy(), myevent['phi'].to_numpy(),bins=(32,32),weights=myevent['pt'].to_numpy())
+		histo, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['pt'])
 		### append to output (transpose to have eta=x, phi=y)
+		print(i)
 		out.append(histo.T)
 		#print(histo)
 		#plt.imshow(image)
@@ -102,7 +68,7 @@ def make_image_event(df,weight):
 
 
 if __name__ == "__main__":
-	tree = uproot3.open("../tree_toymcflowAI_bg0NUE0.root")['vTree']
+	tree = uproot3.open("../../tree_toymcflowAI_bg0NUE0.root")['vTree']
 	print(tree.keys())
 	#tree.arrays(["phi", "eta", "pt"])
 	df = tree.pandas.df()
