@@ -51,10 +51,10 @@ int main(int argc, char **argv)
     jTree->Branch("JEventHeaderList",&event);
 
     // Define some simple structures
-    typedef struct {Double_t phi,eta,pt,E,correction;} JTRACKS;
+    typedef struct {Double_t phi,eta,pt,mass,E,correction;} JTRACKS;
     typedef struct {
        Int_t event,ntrack,icent;
-       Double_t psi_2,psi_3,v_2,v_3;
+       Double_t eCM,psi_2,psi_3,v_2,v_3;
     } JEVENT;
     JTRACKS jtracks;
     JEVENT jevent;
@@ -64,11 +64,13 @@ int main(int argc, char **argv)
     vTree->Branch("phi",&jtracks.phi,"phi/D");
     vTree->Branch("eta",&jtracks.eta,"eta/D");
     vTree->Branch("pt",&jtracks.pt,"pt/D");
+    vTree->Branch("mass",&jtracks.mass,"mass/D");
     vTree->Branch("E",&jtracks.E,"E/D");
     vTree->Branch("correction",&jtracks.correction,"correction/D");
     vTree->Branch("event",&jevent.event,"event/I");
     vTree->Branch("ntrack",&jevent.ntrack,"ntrack/I");
     vTree->Branch("icent",&jevent.icent,"icent/I");
+    vTree->Branch("eCM",&jevent.eCM,"eCM/D");
     vTree->Branch("psi_2",&jevent.psi_2,"psi_2/D");
     vTree->Branch("psi_3",&jevent.psi_3,"psi_3/D");
     vTree->Branch("v_2",&jevent.v_2,"v_2/D");
@@ -177,6 +179,7 @@ int main(int argc, char **argv)
 		jevent.event = iEvent;
 		jevent.ntrack = phiarray.size();
 		jevent.icent  = ic;
+		jevent.eCM  = TMath::Log(5020.);
 		jevent.psi_2  = Psi_n[0];
 		jevent.psi_3  = Psi_n[1];
 		jevent.v_2  = inputVn[1][ic];
@@ -199,6 +202,7 @@ int main(int argc, char **argv)
 			jtracks.eta = eta;
 			jtracks.pt  = pt;
 			jtracks.E   = E;
+			jtracks.mass   = mass;
 			jtracks.correction = 1.0;
 			vTree->Fill();
 		}

@@ -117,13 +117,13 @@ def PlotInputEvents(df):
 		plt.show()
 		ax.figure.savefig("figs/fig_evt{}.pdf".format(i))  
 
-def PlotInputMLEvents(df):
+def PlotInputMLEvents(df,weight):
 	xtitle = "$\\eta$"
 	ytitle = "$\\varphi (\\mathrm{rad})$"
 	for i in range(0,10):
 		myevent = df.loc[df['event'] == i]
-		flights = myevent.pivot("eta", "phi", "E")
-		fig = px.density_heatmap(myevent, x="eta", y="phi", z="E", nbinsx=25, nbinsy=25, color_continuous_scale="Viridis")
+		flights = myevent.pivot("eta", "phi", weight)
+		fig = px.density_heatmap(myevent, x="eta", y="phi", z=weight, nbinsx=32, nbinsy=32, color_continuous_scale="Viridis")
 		fig.update_layout(
 			#title="Plot Title",
 			xaxis_title=xtitle,
@@ -133,7 +133,9 @@ def PlotInputMLEvents(df):
 				family="Courier New, monospace",size=18,color="RebeccaPurple")
 			)
 		fig.show()
-		fig.write_image("figs/figML_evt{}.pdf".format(i))  
+		fig.write_image	("figs/figML_{}_evt{}.pdf".format(weight,i))  
 
-PlotInputMLEvents(df)
+#PlotInputMLEvents(df,"pt")
+PlotInputMLEvents(df,"mass")
+PlotInputMLEvents(df,"eCM")
 #PlotInputEvents(df)
