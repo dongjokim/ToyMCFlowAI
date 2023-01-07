@@ -16,7 +16,7 @@ print('We have {} events'.format(len(data)))
 
 # the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
 x_data = np.vstack(data[:])
-y_data = np.array([0]*300)
+y_data = np.array([0]*3000)
 
 print(x_data.shape, y_data.shape)
 

@@ -54,12 +54,11 @@ def make_image_event(df,weight):
 	out=[]
 	xtitle = "$\\eta$"
 	ytitle = "$\\varphi (\\mathrm{rad})$"
-	for i in range(0,100):
+	for i in range(0,1000):
 		myevent = df.loc[df['event'] == i]
 		histo, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent[weight])
 		### append to output (transpose to have eta=x, phi=y)
 		# need to add df_train[['v_2']].values? for ture v2?
-		print(i)
 		out.append(histo.T)
 		#print(myevent['v_2'])
 		#plt.imshow(image)
