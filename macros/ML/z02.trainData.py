@@ -74,6 +74,8 @@ model_cnn.add(Dense(300, activation='relu'))
 model_cnn.add(Dropout(0.5))
 model_cnn.add(Dense(2, activation='softmax'))
 
+model_cnn.summary()
+plot_model(model_cnn, to_file='figs/model_plot.png', show_shapes=True, show_layer_names=True)
 # Compile model
 model_cnn.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 history_cnn = model_cnn.fit(x_train, y_train, validation_split=0.2, epochs=40, batch_size=100, shuffle=True, verbose=1)

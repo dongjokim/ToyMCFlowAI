@@ -20,7 +20,7 @@ print(history_logi)
 outdir = 'images_out/'
 data = np.load(outdir+'allimages.npz')['arr_0']
 x_test = data[0]
-y_test = data[1]
+y_test = data[0]
 print(x_test.shape)
 predictions0 = model0.predict(x_test)
 predictions1 = model1.predict(x_test)
@@ -44,3 +44,24 @@ axes[0].legend()
 axes[1].legend(['train','validation'])
 fig.show()
 fig.savefig('figs/training_history.png')
+
+
+logscale = True
+logscale = dict(norm=mpl.colors.LogNorm()) if logscale else {}
+
+fig, axes = plt.subplots(1,5,figsize=(20,2.5))
+for i in range(2):
+    im = axes[i].imshow(x_test[predictions_cnn.argmin(axis=0)[i],:,:,0], vmax=1, cmap=cmap, **logscale)
+    plt.colorbar(im, ax=axes[i])
+    axes[i].set(title='most {}-like jet'.format(['top','qcd'][i]))
+axes[2].imshow(x_test[abs(predictions_cnn-0.5).argmin(axis=0)[0],:,:,0], vmax=1, cmap=cmap, **logscale)
+plt.colorbar(im, ax=axes[2])
+axes[2].set(title='most uncertain jet');
+
+for iax, i in enumerate((predictions_cnn - y_test).argmin(axis=0)):
+    im = axes[iax+3].imshow(x_test[i,:,:,0], vmax=1, cmap=cmap, **logscale)
+    plt.colorbar(im, ax=axes[iax+3])
+    axes[iax+3].set_title('Output: {}\nLabel = {}    --FAIL--'.format(predictions_cnn[i], y_test[i]))
+
+fig.tight_layout()
+fig.savefig('figs/cnn_jet_sample.png', dpi=150)
