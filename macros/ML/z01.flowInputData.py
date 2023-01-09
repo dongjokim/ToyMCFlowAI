@@ -50,21 +50,24 @@ def PlotInputMLEvents(df,weight):
 		fig.show()
 		fig.write_image	("figs/figML_{}_evt{}.pdf".format(weight,i))  
 
-def make_image_event(df,weight):
-	out=[]
+def make_image_event(df):
+	allimages = []
+	trueimages = []
+	flowprop = []
 	xtitle = "$\\eta$"
 	ytitle = "$\\varphi (\\mathrm{rad})$"
 	for i in range(0,1000):
 		myevent = df.loc[df['event'] == i]
-		histo, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent[weight])
-		### append to output (transpose to have eta=x, phi=y)
-		# need to add df_train[['v_2']].values? for ture v2?
-		out.append(histo.T)
-		#print(myevent['v_2'])
-		#plt.imshow(image)
-		#plt.show()
-		#fig.write_image	("figs/figML_{}_evt{}.pdf".format(weight,i))     
-	return out, (xedges, yedges)
+		histopt, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['pt'])
+		histomass, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['mass'])
+		histoeCM, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['eCM'])
+		histov2, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['v_2'])
+		flowprop.append([myevent['v_2'],myevent['v_3'],myevent['psi_2'],myevent['psi_3']])
+		allimages.append(histopt)
+		allimages.append(histomass)
+		allimages.append(histoeCM)
+		trueimages.append(histov2)
+	return allimages, trueimages, np.array(flowprop)
 
 
 if __name__ == "__main__":
@@ -76,20 +79,11 @@ if __name__ == "__main__":
 	outdir = 'images_out/'
 	if not os.path.isdir(outdir): os.system('mkdir {}'.format(outdir))
 	cwd = os.getcwd()
-	allimages = []
-	trueimages = []
-	hhpt, _ = make_image_event(df,"pt")
-	hhmass, _ = make_image_event(df,"mass")
-	hheCM, _ = make_image_event(df,"eCM")
-	allimages.append(hhpt)
-	allimages.append(hhmass)
-	allimages.append(hheCM)
+	
+	allimages, trueimages,flowprop  = make_image_event(df)
 	np.savez_compressed(outdir+'allimages.npz', allimages)
-	hhv2, _ = make_image_event(df,"v_2")
-	trueimages.append(hhv2)
-	trueimages.append(hhv2)
-	trueimages.append(hhv2)
 	np.savez_compressed(outdir+'trueimages.npz', trueimages)
+	np.savez_compressed(outdir+'.npz', flowprop)
 
 
 #PlotInputMLEvents(df,"pt")
