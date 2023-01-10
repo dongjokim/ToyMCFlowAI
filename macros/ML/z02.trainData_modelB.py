@@ -66,7 +66,5 @@ model_cnn.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accura
 history_cnn = model_cnn.fit(X, y, validation_split=0.2, epochs=40, batch_size=100, shuffle=True, verbose=1)
 model_dir='trained_modelB/'
 if not os.path.isdir(model_dir): os.system('mkdir '+model_dir)
-model0.save(model_dir+'logi.h5')
-model1.save(model_dir+'mlp.h5')
 model_cnn.save(model_dir+'cnn.h5')
-np.savez(model_dir+'training_histories.npz', [ history.history for history in [history_logi, history_mlp, history_cnn ]])
+np.savez(model_dir+'training_histories.npz', [ history.history for history in [ history_cnn ]])
