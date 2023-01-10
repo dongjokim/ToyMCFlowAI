@@ -12,17 +12,19 @@ from plot_mymodel import *
 from model_B import *
 
 outdir = 'images_out/'
-data = np.load(outdir+'allimages.npz')['arr_0']
-dataTrue = np.load(outdir+'flowprop.npz')['arr_0']
+data = np.load(outdir+'allimages.npz')['arr_0']  # (3000, 32, 32)
+dataTrue = np.load(outdir+'flowprop.npz')['arr_0'] # (3000, 4)
 print('We have all {} events and {} true v2 '.format(len(data),len(dataTrue)))
 # allimages (3000, 32, 32)
 # need to do X[ievt]=3x32x32 per event (total 1000evt)
 # the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
-X = GetMap (data)
+X = np.stack(data)
+print(data[0])
 y = dataTrue
 
 print(X.shape, y.shape)
 
+quit()
 exec(open("model_B.py").read())
 
 n_features = 32*32*3 # per event

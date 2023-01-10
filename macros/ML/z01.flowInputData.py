@@ -62,11 +62,17 @@ def make_image_event(df):
 		histomass, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['mass'])
 		histoeCM, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['eCM'])
 		histov2, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['v_2'])
-		flowprop.append([myevent['v_2'],myevent['v_3'],myevent['psi_2'],myevent['psi_3']])
+		flowinfo = np.array([myevent['v_2'].iloc[0],myevent['v_3'].iloc[0],myevent['psi_2'].iloc[0],myevent['psi_3'].iloc[0]])
+		#print(flowinfo)
+		flowprop.append(flowinfo) #1
 		allimages.append(histopt)
+		flowprop.append(flowinfo) #2
 		allimages.append(histomass)
+		flowprop.append(flowinfo) #3
 		allimages.append(histoeCM)
-		trueimages.append(histov2)
+		trueimages.append(histov2) # not needed!
+	allimages = np.stack(allimages) #We want a 3D np array (n_events, xpixels, ypixels)
+	print(np.asarray(allimages).shape,np.asarray(trueimages).shape,np.asarray(flowprop).shape)
 	return allimages, trueimages, np.array(flowprop)
 
 
@@ -80,7 +86,7 @@ if __name__ == "__main__":
 	if not os.path.isdir(outdir): os.system('mkdir {}'.format(outdir))
 	cwd = os.getcwd()
 	
-	allimages, trueimages,flowprop  = make_image_event(df)
+	allimages,trueimages,flowprop  = make_image_event(df)
 	np.savez_compressed(outdir+'allimages.npz', allimages)
 	np.savez_compressed(outdir+'trueimages.npz', trueimages)
 	np.savez_compressed(outdir+'flowprop.npz', flowprop)
