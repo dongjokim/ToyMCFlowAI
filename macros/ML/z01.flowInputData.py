@@ -83,7 +83,7 @@ if __name__ == "__main__":
 	allimages, trueimages,flowprop  = make_image_event(df)
 	np.savez_compressed(outdir+'allimages.npz', allimages)
 	np.savez_compressed(outdir+'trueimages.npz', trueimages)
-	np.savez_compressed(outdir+'.npz', flowprop)
+	np.savez_compressed(outdir+'flowprop.npz', flowprop)
 
 
 #PlotInputMLEvents(df,"pt")
