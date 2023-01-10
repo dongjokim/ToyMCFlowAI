@@ -66,9 +66,7 @@ def make_image_event(df):
 		#print(flowinfo)
 		flowprop.append(flowinfo) #1
 		allimages.append(histopt)
-		flowprop.append(flowinfo) #2
 		allimages.append(histomass)
-		flowprop.append(flowinfo) #3
 		allimages.append(histoeCM)
 		trueimages.append(histov2) # not needed!
 	allimages = np.stack(allimages) #We want a 3D np array (n_events, xpixels, ypixels)

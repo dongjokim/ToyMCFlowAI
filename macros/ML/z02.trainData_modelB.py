@@ -11,32 +11,6 @@ from keras.layers import Dense, Flatten, Dropout, Activation, Conv2D, MaxPooling
 from tensorflow.keras import models, layers, utils, backend as K
 from plot_mymodel import *
 from model_B import *
-def binary_step_activation(x):
-    ##return 1 if x>0 else 0 
-    return K.switch(x>0, tf.math.divide(x,x), tf.math.multiply(x,0))
-
-# define metrics
-def Recall(y_true, y_pred):
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
-    return recall
-
-def Precision(y_true, y_pred):
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
-    return precision
-
-def F1(y_true, y_pred):
-    precision = Precision(y_true, y_pred)
-    recall = Recall(y_true, y_pred)
-    return 2*((precision*recall)/(precision+recall+K.epsilon()))
-
-def R2(y, y_hat):
-    ss_res =  K.sum(K.square(y - y_hat)) 
-    ss_tot = K.sum(K.square(y - K.mean(y))) 
-    return ( 1 - ss_res/(ss_tot + K.epsilon()) )
 
 outdir = 'images_out/'
 data = np.load(outdir+'allimages.npz')['arr_0']  # (3000, 32, 32)
@@ -58,7 +32,7 @@ n_features = ndim # per event
 
 model_cnn = MyModel(n_features)
 
-plot_model(model_cnn, to_file='figs/model_plot.png', show_shapes=True, show_layer_names=True)
+plot_model(model_cnn, to_file='figs/modelB_plot.png', show_shapes=True, show_layer_names=True)
 #visualize_nn(model_cnn)
 
 # Compile model
