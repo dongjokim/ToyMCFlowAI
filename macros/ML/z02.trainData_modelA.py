@@ -46,7 +46,7 @@ exec(open("model_A.py").read())
 
 model0, model1, history_mlp,model_cnn = MyModel(x_train, y_train)
 plot_model(model_cnn, to_file='figs/modelA_plot.png', show_shapes=True, show_layer_names=True)
-visualize_nn(model_cnn)
+#visualize_nn(model_cnn)
 # Compile model
 model_cnn.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 history_cnn = model_cnn.fit(x_train, y_train, validation_split=0.2, epochs=40, batch_size=100, shuffle=True, verbose=1)
