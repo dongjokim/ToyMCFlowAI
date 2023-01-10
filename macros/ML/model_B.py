@@ -4,6 +4,7 @@ from tensorflow.keras.utils import plot_model
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, Flatten, Dropout, Activation, Conv2D, MaxPooling2D
+from tensorflow.keras import models, layers, utils, backend as K
 def binary_step_activation(x):
     ##return 1 if x>0 else 0 
     return K.switch(x>0, tf.math.divide(x,x), tf.math.multiply(x,0))
