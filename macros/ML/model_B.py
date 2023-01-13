@@ -49,8 +49,6 @@ def MyModel(n_features):
       Dense(name="h3", units=int(round((n_features+1)/12)), 
                    activation='relu'),
       ### layer output
-      #Dense(name="output", units=1, activation='sigmoid')
-      #Dense(name="output", units=1, activation='relu')
       Dense(name="output", units=1, activation='relu')
   ])
 

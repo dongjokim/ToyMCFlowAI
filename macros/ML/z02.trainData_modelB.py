@@ -23,7 +23,7 @@ print('We have all {} events and {} true v2 '.format(len(data),len(dataTrue)))
 ndim = 3*32*32
 #X = preprocessing.normalize(data.reshape(1000,ndim),norm='l2');
 X = data.reshape(1000,ndim)
-X = preprocessing.normalize(X,norm='l2');
+X = preprocessing.normalize(X,norm='l2'); #L2 normalization scheme
 y = dataTrue[:, 0] # v2 only
 
 print(X.shape, y.shape)
@@ -38,8 +38,9 @@ plot_model(model_cnn, to_file='figs/modelB_plot.png', show_shapes=True, show_lay
 #visualize_nn(model_cnn)
 
 # Compile model
-#model_cnn.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy',F1])
-model_cnn.compile(optimizer='adam', loss=tf.keras.losses.MeanSquaredError());#, metrics=['accuracy',F1])
+model_cnn.compile(optimizer='adam', loss=tf.keras.losses.MeanSquaredError());
+#epochs=10 to not overfit
+#batch_size=32 (PRD)
 history_cnn = model_cnn.fit(X, y, validation_split=0.3, epochs=10, batch_size=32, shuffle=True, verbose=1)
 model_dir='trained_modelB/'
 if not os.path.isdir(model_dir): os.system('mkdir '+model_dir)

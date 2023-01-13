@@ -58,10 +58,10 @@ def make_image_event(df):
 	ytitle = "$\\varphi (\\mathrm{rad})$"
 	for i in range(0,1000):
 		myevent = df.loc[df['event'] == i]
-		histopt, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['pt'],density=True)
-		histomass, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['mass'],density=True)
-		histoeCM, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['eCM'],density=True)
-		histov2, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['v_2'],density=True)
+		histopt, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['pt'])
+		histomass, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['mass'])
+		histoeCM, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['eCM'])
+		histov2, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['v_2'])
 		flowinfo = np.array([myevent['v_2'].iloc[0],myevent['v_3'].iloc[0],myevent['psi_2'].iloc[0],myevent['psi_3'].iloc[0]])
 		#print(flowinfo)
 		flowprop.append(flowinfo) #1
