@@ -3,8 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 # define the function
 import tensorflow as tf
-import shap
+#import shap
 from tensorflow.keras.utils import plot_model
+from sklearn import preprocessing
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, Flatten, Dropout, Activation, Conv2D, MaxPooling2D
@@ -20,8 +21,9 @@ print('We have all {} events and {} true v2 '.format(len(data),len(dataTrue)))
 # need to do X[ievt]=3x32x32 per event (total 1000evt)
 # the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
 ndim = 3*32*32
+#X = preprocessing.normalize(data.reshape(1000,ndim),norm='l2');
 X = data.reshape(1000,ndim)
-print(X[0])
+X = preprocessing.normalize(X,norm='l2');
 y = dataTrue[:, 0] # v2 only
 
 print(X.shape, y.shape)
@@ -36,8 +38,9 @@ plot_model(model_cnn, to_file='figs/modelB_plot.png', show_shapes=True, show_lay
 #visualize_nn(model_cnn)
 
 # Compile model
-model_cnn.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy',F1])
-history_cnn = model_cnn.fit(X, y, validation_split=0.2, epochs=40, batch_size=100, shuffle=True, verbose=1)
+#model_cnn.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy',F1])
+model_cnn.compile(optimizer='adam', loss=tf.keras.losses.MeanSquaredError());#, metrics=['accuracy',F1])
+history_cnn = model_cnn.fit(X, y, validation_split=0.3, epochs=10, batch_size=32, shuffle=True, verbose=1)
 model_dir='trained_modelB/'
 if not os.path.isdir(model_dir): os.system('mkdir '+model_dir)
 model_cnn.save(model_dir+'cnn.h5')

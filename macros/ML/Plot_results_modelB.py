@@ -35,52 +35,63 @@ print('We have all {} events and {} true v2 '.format(len(data),len(dataTrue)))
 # the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
 ndim = 3*32*32
 X = data.reshape(1000,ndim)
-print(X[0])
+print("--",X[0])
 y = dataTrue[:, 0] # v2 only
 
 print(X.shape, y.shape)
 
-n_train = 1000
+n_train = 700;
 (x_train, x_test) = X[:n_train], X[n_train:]
 (y_train, y_test) = y[:n_train], y[n_train:]
-print(x_test.shape)
+print("**",x_test.shape)
 
 predictions_cnn = model_cnn.predict(x_test)
+#print(predictions_cnn.shape);
+print(y_test);
+#print(predictions_cnn);
 
-fig, axes = plt.subplots(1,2,figsize=(10,4))
+#fig, axes = plt.subplots(1,2,figsize=(10,4))
 
-nn=20
-axes[1].scatter(nn, 1.*sum(np.argmax(predictions_cnn, axis=1) == np.argmax(y_test, axis=1))/ len(y_test),c='g')
-for i, history in enumerate([history_cnn]):
-	axes[1].plot(history['accuracy'][:nn], c=plt.get_cmap("tab10")(i), label='train')
-	axes[1].plot(history['val_accuracy'][:nn], c=plt.get_cmap("tab10")(i), ls ='--', label='validation')
-	axes[0].plot(history['loss'][:nn], c=plt.get_cmap("tab10")(i), label=['logistic','small MLP', 'CNN', 'CNN v2'][i])
-	axes[0].plot(history['val_loss'][:nn], c=plt.get_cmap("tab10")(i), ls='--')
-for iax in range(2):
-	axes[iax].set(xlabel='epoch', ylabel=['loss','accuracy'][iax])
+#nn=20
+#axes[1].scatter(nn, 1.*sum(np.argmax(predictions_cnn, axis=1) == np.argmax(y_test, axis=1))/ len(y_test),c='g')
+#for i, history in enumerate([history_cnn]):
+#	axes[1].plot(history['accuracy'][:nn], c=plt.get_cmap("tab10")(i), label='train')
+#	axes[1].plot(history['val_accuracy'][:nn], c=plt.get_cmap("tab10")(i), ls ='--', label='validation')
+#	axes[0].plot(history['loss'][:nn], c=plt.get_cmap("tab10")(i), label=['logistic','small MLP', 'CNN', 'CNN v2'][i])
+#	axes[0].plot(history['val_loss'][:nn], c=plt.get_cmap("tab10")(i), ls='--')
+#for iax in range(2):
+#	axes[iax].set(xlabel='epoch', ylabel=['loss','accuracy'][iax])
+#
+#axes[0].legend()
+#axes[1].legend(['train','validation'])
+#fig.show()
+#fig.savefig('figs/training_modelB_history.png')
 
-axes[0].legend()
-axes[1].legend(['train','validation'])
-fig.show()
-fig.savefig('figs/training_modelB_history.png')
 
+#logscale = True
+#logscale = dict(norm=mpl.colors.LogNorm()) if logscale else {}
+#
+#fig, axes = plt.subplots(1,5,figsize=(20,2.5))
+#for i in range(2):
+#	im = axes[i].imshow(x_test[predictions_cnn.argmin(axis=0)[i],:,:,0], cmap=cmap, **logscale)
+#	plt.colorbar(im, ax=axes[i])
+#	axes[i].set(title='most {}-like'.format(['all','true'][i]))
+#axes[2].imshow(x_test[abs(predictions_cnn-0.5).argmin(axis=0)[0],:,:,0], cmap=cmap, **logscale)
+#plt.colorbar(im, ax=axes[2])
+#axes[2].set(title='most uncertain event');
+#
+#for iax, i in enumerate((predictions_cnn - y_test).argmin(axis=0)):
+#	im = axes[iax+3].imshow(x_test[i,:,:,0], cmap=cmap, **logscale)
+#	plt.colorbar(im, ax=axes[iax+3])
+#	axes[iax+3].set_title('Output: {}\nLabel = {}    --FAIL--'.format(predictions_cnn[i], y_test[i]))
+#
+#fig.tight_layout()
+#fig.savefig('figs/cnn_test_modelB.png', dpi=150)
 
-logscale = True
-logscale = dict(norm=mpl.colors.LogNorm()) if logscale else {}
+print(y_test[:5],predictions_cnn[:,0][:5]);
 
-fig, axes = plt.subplots(1,5,figsize=(20,2.5))
-for i in range(2):
-	im = axes[i].imshow(x_test[predictions_cnn.argmin(axis=0)[i],:,:,0], cmap=cmap, **logscale)
-	plt.colorbar(im, ax=axes[i])
-	axes[i].set(title='most {}-like'.format(['all','true'][i]))
-axes[2].imshow(x_test[abs(predictions_cnn-0.5).argmin(axis=0)[0],:,:,0], cmap=cmap, **logscale)
-plt.colorbar(im, ax=axes[2])
-axes[2].set(title='most uncertain event');
+fig,ax = plt.subplots(1,1,figsize=(5,5));
+ax.scatter(y_test,predictions_cnn[:,0]);
+fig.tight_layout();
+fig.savefig('figs/cnn_test_modelB_corr.png',dpi=150);
 
-for iax, i in enumerate((predictions_cnn - y_test).argmin(axis=0)):
-	im = axes[iax+3].imshow(x_test[i,:,:,0], cmap=cmap, **logscale)
-	plt.colorbar(im, ax=axes[iax+3])
-	axes[iax+3].set_title('Output: {}\nLabel = {}    --FAIL--'.format(predictions_cnn[i], y_test[i]))
-
-fig.tight_layout()
-fig.savefig('figs/cnn_test_modelB.png', dpi=150)
