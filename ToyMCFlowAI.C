@@ -208,7 +208,7 @@ int main(int argc, char **argv)
 			jtracks.correction = 1.0;
 			vTree->Fill();
 		}
-		jflowana->Run(phiarray, phiarrayWeight);
+		//jflowana->Run(phiarray, phiarrayWeight);
 		jTree->Fill(); // fill event
 		
 	}// End of event loop
