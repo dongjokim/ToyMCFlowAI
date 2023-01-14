@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     // Define some simple structures
     typedef struct {Double_t phi,eta,pt,mass,E,correction;} JTRACKS;
     typedef struct {
-       Int_t event,ntrack,icent;
+       Int_t runnumber,event,ntrack,icent;
        Double_t eCM,psi_2,psi_3,v_2,v_3;
     } JEVENT;
     JTRACKS jtracks;
@@ -67,6 +67,7 @@ int main(int argc, char **argv)
     vTree->Branch("mass",&jtracks.mass,"mass/D");
     vTree->Branch("E",&jtracks.E,"E/D");
     vTree->Branch("correction",&jtracks.correction,"correction/D");
+    vTree->Branch("runnumber",&jevent.event,"runnumber/I");
     vTree->Branch("event",&jevent.event,"event/I");
     vTree->Branch("ntrack",&jevent.ntrack,"ntrack/I");
     vTree->Branch("icent",&jevent.icent,"icent/I");
@@ -176,6 +177,7 @@ int main(int argc, char **argv)
 			jhisto->hBgPhi->Fill(phi);
 		}
 		// Signal + background
+		jevent.runnumber = random_seed; // just for MC
 		jevent.event = iEvent;
 		jevent.ntrack = phiarray.size();
 		jevent.icent  = ic;
