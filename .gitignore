@@ -1,5 +1,6 @@
-
+*.sublime*
 *.o
+.DS_Store
 nanoDict.cc
 nanoDict_rdict.pcm
 macros/ML/.DS_Store
