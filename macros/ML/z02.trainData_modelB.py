@@ -17,7 +17,7 @@ from glob import glob
 outdir = 'images_out/'
 for fn in glob(outdir+"images*.npz"):
 	io = np.load(fn);
-	data = io['arr_0']  # (3000, 32, 32)
+	data = io['arr_0']
 	obs = io['arr_1']
 
 	print('We have all {} events and {} true v2 '.format(data.shape[0],obs.shape[0]))

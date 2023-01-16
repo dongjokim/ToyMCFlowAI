@@ -9,6 +9,8 @@ np_load_old = np.load
 from keras.models import Sequential
 from keras.layers import Dense, Flatten, Dropout, Activation, Conv2D, MaxPooling2D
 from tensorflow.keras import models, layers, utils, backend as K
+from sklearn import preprocessing
+from glob import glob
 
 def F1(y_true, y_pred):
     precision = Precision(y_true, y_pred)
@@ -26,16 +28,27 @@ history_cnn = np.load(model_dir+'training_histories.npz')['arr_0']
 model_cnn = keras.models.load_model("trained_modelB/cnn.h5",custom_objects={"F1": F1 })
 print(model_cnn)
 
+#todo: shared with train model, make a function
 outdir = 'images_out/'
-data = np.load(outdir+'allimages.npz')['arr_0']  # (3000, 32, 32)
-dataTrue = np.load(outdir+'flowprop.npz')['arr_0'] # (3000, 4)
-print('We have all {} events and {} true v2 '.format(len(data),len(dataTrue)))
-# allimages (3000, 32, 32)
-# need to do X[ievt]=3x32x32 per event (total 1000evt)
-# the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
-ndim = 3*32*32
-X = data.reshape(1000,ndim)
-y = dataTrue[:, 0] # v2 only
+for fn in glob(outdir+"images*.npz"):
+	io = np.load(fn);
+	data = io['arr_0']
+	obs = io['arr_1']
+
+	print('We have all {} events and {} true v2 '.format(data.shape[0],obs.shape[0]))
+	ndim = 3*32*32
+	x = data.reshape(data.shape[0],ndim)
+	try:
+		X = np.concatenate((X,x));
+		y = np.concatenate((y,obs));
+	except NameError:
+		X = x;
+		y = obs;
+		
+	print("Loaded {} ".format(fn),X.shape);
+
+X = preprocessing.normalize(X,norm='l2'); #L2 normalization scheme
+y = y[:, 0] # v2 only
 
 n_train = 700;
 (x_train, x_test) = X[:n_train], X[n_train:]
