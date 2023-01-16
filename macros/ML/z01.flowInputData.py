@@ -83,16 +83,13 @@ if __name__ == "__main__":
 	except FileExistsError:
 		pass;
 
-	for fn in glob.glob("../../outputs/*.root")[:2]:
+	for fn in glob.glob("../../outputs/*.root"):
 		tree = uproot3.open(fn)['vTree']
 		df = tree.pandas.df();
 
 		allimages,trueimages,flowprop = make_image_event(df)
 
 		nn = Path(fn).stem;
-		#np.savez_compressed(outdir+'allimages_{}.npz'.format(nn), allimages)
-		#np.savez_compressed(outdir+'trueimages_{}.npz'.format(nn), trueimages)
-		#np.savez_compressed(outdir+'flowprop_{}.npz'.format(nn), flowprop)
 		np.savez_compressed(outdir+'images_{}.npz'.format(nn),allimages,flowprop);
 
 		print("Loaded {}...".format(fn));
