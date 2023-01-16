@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 import uproot3
 import ROOT
 import pandas as pd
@@ -10,6 +11,8 @@ import glob
 #import plotly.graph_objs as go
 import matplotlib.pyplot as plt
 #import seaborn as sns
+
+from pathlib import Path
 
 
 def PlotInputEvents(df):
@@ -77,33 +80,32 @@ def make_image_event(df):
 
 if __name__ == "__main__":
 	#TODO: IMPLEMENT DATA STREAMER FOR THE TRAINING PROCESS.
-	eventImages = [];
+	outdir = 'images_out/'
+	try:
+		os.mkdir(outdir);
+	except FileExistsError:
+		pass;
 
-	for fn in glob.glob("../../outputs/*.root")[:1]:
+	for fn in glob.glob("../../outputs/*.root")[:2]:
 		tree = uproot3.open(fn)['vTree']
-		df1 = tree.pandas.df();
-		try:
-			df = pd.concat([df,df1],sort=False,copy=False);
-		except NameError:
-			df = df1;
+		df = tree.pandas.df();
+
+		allimages,trueimages,flowprop = make_image_event(df)
+
+		nn = Path(fn).stem;
+		#np.savez_compressed(outdir+'allimages_{}.npz'.format(nn), allimages)
+		#np.savez_compressed(outdir+'trueimages_{}.npz'.format(nn), trueimages)
+		#np.savez_compressed(outdir+'flowprop_{}.npz'.format(nn), flowprop)
+		np.savez_compressed(outdir+'images_{}.npz'.format(nn),allimages,flowprop);
+
 		print("Loaded {}...".format(fn));
 	
 	print(df.head());
 	print("Rows:",len(df.index));
-
-	exit();
-
-	outdir = 'images_out/'
-	if not os.path.isdir(outdir): os.system('mkdir {}'.format(outdir))
-	cwd = os.getcwd()
-	
-	allimages,trueimages,flowprop = make_image_event(df)
-	np.savez_compressed(outdir+'allimages.npz', allimages)
-	np.savez_compressed(outdir+'trueimages.npz', trueimages)
-	np.savez_compressed(outdir+'flowprop.npz', flowprop)
 
 
 #PlotInputMLEvents(df,"pt")
 #PlotInputMLEvents(df,"mass")
 #PlotInputMLEvents(df,"eCM")
 #PlotInputEvents(df)
+

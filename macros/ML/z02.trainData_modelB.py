@@ -12,19 +12,30 @@ from keras.layers import Dense, Flatten, Dropout, Activation, Conv2D, MaxPooling
 from tensorflow.keras import models, layers, utils, backend as K
 from plot_mymodel import *
 from model_B import *
+from glob import glob
 
 outdir = 'images_out/'
-data = np.load(outdir+'allimages.npz')['arr_0']  # (3000, 32, 32)
-dataTrue = np.load(outdir+'flowprop.npz')['arr_0'] # (3000, 4)
-print('We have all {} events and {} true v2 '.format(len(data),len(dataTrue)))
-# allimages (3000, 32, 32)
-# need to do X[ievt]=3x32x32 per event (total 1000evt)
-# the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
-ndim = 3*32*32
-#X = preprocessing.normalize(data.reshape(1000,ndim),norm='l2');
-X = data.reshape(1000,ndim)
+for fn in glob(outdir+"images*.npz"):
+	io = np.load(fn);
+	data = io['arr_0']  # (3000, 32, 32)
+	obs = io['arr_1']
+	#print('We have all {} events and {} true v2 '.format(len(data),len(dataTrue)))
+	# allimages (3000, 32, 32)
+	# need to do X[ievt]=3x32x32 per event (total 1000evt)
+	# the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
+	ndim = 3*32*32
+	x = data.reshape(1000,ndim)
+	try:
+		X = np.concatenate((X,x));
+		y = np.concatenate((y,obs));
+	except NameError:
+		X = x;
+		y = obs;
+		
+	print("Loaded {} ".format(fn),X.shape);
+
 X = preprocessing.normalize(X,norm='l2'); #L2 normalization scheme
-y = dataTrue[:, 0] # v2 only
+y = y[:, 0] # v2 only
 
 print(X.shape, y.shape)
 
