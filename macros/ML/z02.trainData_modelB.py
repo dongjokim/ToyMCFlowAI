@@ -19,12 +19,12 @@ for fn in glob(outdir+"images*.npz"):
 	io = np.load(fn);
 	data = io['arr_0']  # (3000, 32, 32)
 	obs = io['arr_1']
-	#print('We have all {} events and {} true v2 '.format(len(data),len(dataTrue)))
-	# allimages (3000, 32, 32)
+
+	print('We have all {} events and {} true v2 '.format(data.shape[0],obs.shape[0]))
 	# need to do X[ievt]=3x32x32 per event (total 1000evt)
 	# the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
 	ndim = 3*32*32
-	x = data.reshape(1000,ndim)
+	x = data.reshape(data.shape[0],ndim)
 	try:
 		X = np.concatenate((X,x));
 		y = np.concatenate((y,obs));
