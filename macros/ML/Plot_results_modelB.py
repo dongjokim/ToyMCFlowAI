@@ -39,8 +39,8 @@ for fn in glob(outdir+"images*.npz"):#[:3]:
 	print('We have {} events and {} true v2 '.format(data.shape[0],obs.shape[0]))
 	N += data.shape[0];
 
-	#ndim = 3*32*32
-	ndim = 1*32*32 #only pT
+	ndim = 3*32*32
+	#ndim = 1*32*32
 	x = data.reshape(data.shape[0],ndim)
 	try:
 		X = np.concatenate((X,x));
@@ -49,13 +49,13 @@ for fn in glob(outdir+"images*.npz"):#[:3]:
 		X = x;
 		y = obs;
 		
-	print("Loaded {} ".format(fn),X.shape);
+	print("Loaded {}".format(fn),X.shape);
 
 preprocessing.normalize(X,norm='l2',copy=False); #L2 normalization scheme
 #y = preprocessing.normalize(y,norm='l1');
 y = y[:,0] # v2 only
 
-n_train = int(np.ceil(0.5*N));
+n_train = int(np.ceil(0.7*N));
 (x_train, x_test) = X[:n_train], X[n_train:]
 (y_train, y_test) = y[:n_train], y[n_train:]
 
@@ -65,6 +65,12 @@ print(y_test[:5],"\n",predictions_cnn[:,0][:5]);
 
 fig,ax = plt.subplots(1,1,figsize=(5,5));
 ax.scatter(y_test,predictions_cnn[:,0]);
+#z,xe,ye = np.histogram2d(y_test,predictions_cnn[:,0],bins=(100,100));#,weights=myevent['pt'])
+#m = z.max();
+#z[z < 1] = n
+#x = 0.5*(xe[:-1]+xe[1:]);
+#y = 0.5*(ye[:-1]+ye[1:]);
+#ax.contourf(x,y,z,levels=10,norm=mpl.colors.LogNorm(1,m));
 fig.tight_layout();
 fig.savefig('figs/cnn_test_modelB_corr.png',dpi=150);
 

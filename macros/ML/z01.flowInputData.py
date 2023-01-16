@@ -12,8 +12,8 @@ import glob
 import matplotlib.pyplot as plt
 #import seaborn as sns
 
+from multiprocessing import Pool
 from pathlib import Path
-
 
 def PlotInputEvents(df):
 	xtitle = "$\\eta$"
@@ -61,17 +61,29 @@ def make_image_event(df):
 	N = np.max(df['event'])+1;
 	for i in range(0,N):
 		myevent = df.loc[df['event'] == i]
-		histopt, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32));#,weights=myevent['pt'])
+		histopt, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['pt'])
 		histomass, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['mass'])
 		histoeCM, xedges, yedges = np.histogram2d(myevent['eta'], myevent['phi'],bins=(32,32),weights=myevent['eCM'])
 		flowinfo = np.array([myevent['v_2'].iloc[0],myevent['v_3'].iloc[0],myevent['psi_2'].iloc[0],myevent['psi_3'].iloc[0]])
 
-		allimages.append(np.array([histopt]));
+		allimages.append(np.array([histopt,histomass,histoeCM]));
 		flowprop.append(flowinfo) #1
 	allimages = np.stack(allimages) #We want a 3D np array (n_events, xpixels, ypixels)
 	print(np.asarray(allimages).shape,np.asarray(flowprop).shape)
 	return allimages,np.array(flowprop)
 
+def process(fn):
+	print("Loading {}...".format(fn));
+
+	tree = uproot3.open(fn)['vTree']
+	df = tree.pandas.df();
+
+	allimages,flowprop = make_image_event(df)
+
+	nn = Path(fn).stem;
+	np.savez_compressed(outdir+'images_{}.npz'.format(nn),allimages,flowprop);
+
+	print("Done: {}.".format(fn));
 
 if __name__ == "__main__":
 	#TODO: IMPLEMENT DATA STREAMER FOR THE TRAINING PROCESS.
@@ -82,20 +94,14 @@ if __name__ == "__main__":
 		pass;
 
 	#TODO: parallel
-	for fn in glob.glob("../../outputs/*.root"):
-		tree = uproot3.open(fn)['vTree']
-		df = tree.pandas.df();
-
-		allimages,flowprop = make_image_event(df)
-
-		nn = Path(fn).stem;
-		np.savez_compressed(outdir+'images_{}.npz'.format(nn),allimages,flowprop);
-
-		print("Loaded {}...".format(fn));
+	with Pool(processes=8) as p:
+		for fn in glob.glob("../../outputs/*.root"):
+			p.apply_async(process,args=(fn,));
+		p.close();
+		p.join();
 	
-	print(df.head());
-	print("Rows:",len(df.index));
-
+	#print(df.head());
+	#print("Rows:",len(df.index));
 
 #PlotInputMLEvents(df,"pt")
 #PlotInputMLEvents(df,"mass")

@@ -23,8 +23,8 @@ for fn in glob(outdir+"images*.npz"):#[:3]:
 	print('We have {} events and {} true v2 '.format(data.shape[0],obs.shape[0]))
 	# need to do X[ievt]=3x32x32 per event (total 1000evt)
 	# the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
-	#ndim = 3*32*32
-	ndim = 1*32*32 #only pT
+	ndim = 3*32*32
+	#ndim = 1*32*32
 	x = data.reshape(data.shape[0],ndim)
 	try:
 		X = np.concatenate((X,x));
@@ -33,7 +33,7 @@ for fn in glob(outdir+"images*.npz"):#[:3]:
 		X = x;
 		y = obs;
 		
-	print("Loaded {} ".format(fn),X.shape);
+	print("Loaded {}".format(fn),X.shape);
 
 preprocessing.normalize(X,norm='l2',copy=False); #L2 normalization scheme
 #y = preprocessing.normalize(y,norm='l2');
@@ -52,7 +52,7 @@ plot_model(model_cnn, to_file='figs/modelB_plot.png', show_shapes=True, show_lay
 model_cnn.compile(optimizer='adam', loss=tf.keras.losses.MeanSquaredError());
 #epochs=10 to not overfit
 #batch_size=32 (PRD)
-history_cnn = model_cnn.fit(X, y, validation_split=0.5, epochs=10, batch_size=32, shuffle=False, verbose=1, validation_steps=1)
+history_cnn = model_cnn.fit(X, y, validation_split=0.3, epochs=15, batch_size=32, shuffle=False, verbose=1, validation_steps=1)
 try:
 	model_dir='trained_modelB/'
 	os.mkdir(model_dir);
