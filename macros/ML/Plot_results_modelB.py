@@ -63,14 +63,18 @@ predictions_cnn = model_cnn.predict(x_test)
 
 print(y_test[:5],"\n",predictions_cnn[:,0][:5]);
 
-fig,ax = plt.subplots(1,1,figsize=(5,5));
-ax.scatter(y_test,predictions_cnn[:,0]);
+fig,ax = plt.subplots(1,1,figsize=(7,5));
+#ax.scatter(y_test,predictions_cnn[:,0]);
 #z,xe,ye = np.histogram2d(y_test,predictions_cnn[:,0],bins=(100,100));#,weights=myevent['pt'])
 #m = z.max();
-#z[z < 1] = n
+##z[z < 1] = np.nan
 #x = 0.5*(xe[:-1]+xe[1:]);
 #y = 0.5*(ye[:-1]+ye[1:]);
 #ax.contourf(x,y,z,levels=10,norm=mpl.colors.LogNorm(1,m));
-fig.tight_layout();
-fig.savefig('figs/cnn_test_modelB_corr.png',dpi=150);
+h = ax.hist2d(y_test,predictions_cnn[:,0],bins=100,norm="log",cmap="RdBu_r");
+ax.set_xlabel("$v_2^\\mathrm{true}$");
+ax.set_ylabel("$v_2^\\mathrm{pred}$");
+fig.colorbar(h[3],ax=ax);
+#fig.tight_layout();
+fig.savefig('figs/modelB_corr.pdf',bbox_inches="tight");#,dpi=150);
 

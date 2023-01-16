@@ -52,7 +52,7 @@ plot_model(model_cnn, to_file='figs/modelB_plot.png', show_shapes=True, show_lay
 model_cnn.compile(optimizer='adam', loss=tf.keras.losses.MeanSquaredError());
 #epochs=10 to not overfit
 #batch_size=32 (PRD)
-history_cnn = model_cnn.fit(X, y, validation_split=0.3, epochs=15, batch_size=32, shuffle=False, verbose=1, validation_steps=1)
+history_cnn = model_cnn.fit(X, y, validation_split=0.3, epochs=20, batch_size=32, shuffle=True, verbose=1, validation_steps=1)
 try:
 	model_dir='trained_modelB/'
 	os.mkdir(model_dir);

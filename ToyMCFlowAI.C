@@ -153,8 +153,8 @@ int main(int argc, char **argv)
 		// Setting parameter values of pdf
 		fourier->SetParameter(0,Nch); 
 		//https://www.bnl.gov/isd/documents/88233.pdf
-		double v2 = prng->Gaus(inputVn[1][ic],0.1*inputVn[1][ic]);
-		double v3 = prng->Gaus(inputVn[2][ic],0.1*inputVn[2][ic]);
+		double v2 = prng->Gaus(inputVn[1][ic],0.01*inputVn[1][ic]); //small sigma 0.01, large 0.3
+		double v3 = prng->Gaus(inputVn[2][ic],0.01*inputVn[2][ic]);
 		/*for (Int_t i=0; i<NH-1; i++){
 			fourier->SetParameter(i+1,inputVn[i][ic]); //Setting the vn parameters
 		}*/
@@ -234,10 +234,10 @@ void NormalizeSample(TH1D *hist)
 		return;
 }
 Int_t GetCentralityBin( Double_t dice) {
-	//return TMath::Floor(dice*4);
-	if(dice <= 0.333)
+	return (int)TMath::Floor(dice*7.0);
+	/*if(dice <= 0.333)
 		return 0;
 	if(dice <= 0.666)
 		return 1;
-	return 2;
+	return 2;*/
 }

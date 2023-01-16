@@ -86,19 +86,19 @@ def process(fn):
 	print("Done: {}.".format(fn));
 
 if __name__ == "__main__":
-	#TODO: IMPLEMENT DATA STREAMER FOR THE TRAINING PROCESS.
 	outdir = 'images_out/'
 	try:
 		os.mkdir(outdir);
 	except FileExistsError:
 		pass;
 
-	#TODO: parallel
 	with Pool(processes=8) as p:
 		for fn in glob.glob("../../outputs/*.root"):
 			p.apply_async(process,args=(fn,));
 		p.close();
 		p.join();
+	#for fn in glob.glob("../../outputs/*.root")[:1]: #<---testing
+	#	process(fn);
 	
 	#print(df.head());
 	#print("Rows:",len(df.index));
