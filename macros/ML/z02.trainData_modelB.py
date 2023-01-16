@@ -15,15 +15,16 @@ from model_B import *
 from glob import glob
 
 outdir = 'images_out/'
-for fn in glob(outdir+"images*.npz"):
+for fn in glob(outdir+"images*.npz"):#[:3]:
 	io = np.load(fn);
 	data = io['arr_0']
 	obs = io['arr_1']
 
-	print('We have all {} events and {} true v2 '.format(data.shape[0],obs.shape[0]))
+	print('We have {} events and {} true v2 '.format(data.shape[0],obs.shape[0]))
 	# need to do X[ievt]=3x32x32 per event (total 1000evt)
 	# the data coming out of previous commands is a list of 2D arrays. We want a 3D np array (n_events, xpixels, ypixels)
-	ndim = 3*32*32
+	#ndim = 3*32*32
+	ndim = 1*32*32 #only pT
 	x = data.reshape(data.shape[0],ndim)
 	try:
 		X = np.concatenate((X,x));
@@ -34,14 +35,13 @@ for fn in glob(outdir+"images*.npz"):
 		
 	print("Loaded {} ".format(fn),X.shape);
 
-X = preprocessing.normalize(X,norm='l2'); #L2 normalization scheme
-y = y[:, 0] # v2 only
-
-print(X.shape, y.shape)
+preprocessing.normalize(X,norm='l2',copy=False); #L2 normalization scheme
+#y = preprocessing.normalize(y,norm='l2');
+y = y[:,0] # v2 only
 
 exec(open("model_B.py").read())
 
-n_features = ndim # per event
+n_features = ndim # per event[:,0]
 
 model_cnn = MyModel(n_features)
 
@@ -52,8 +52,12 @@ plot_model(model_cnn, to_file='figs/modelB_plot.png', show_shapes=True, show_lay
 model_cnn.compile(optimizer='adam', loss=tf.keras.losses.MeanSquaredError());
 #epochs=10 to not overfit
 #batch_size=32 (PRD)
-history_cnn = model_cnn.fit(X, y, validation_split=0.3, epochs=10, batch_size=32, shuffle=True, verbose=1)
-model_dir='trained_modelB/'
-if not os.path.isdir(model_dir): os.system('mkdir '+model_dir)
+history_cnn = model_cnn.fit(X, y, validation_split=0.5, epochs=10, batch_size=32, shuffle=False, verbose=1, validation_steps=1)
+try:
+	model_dir='trained_modelB/'
+	os.mkdir(model_dir);
+except FileExistsError:
+	pass;
 model_cnn.save(model_dir+'cnn.h5')
 np.savez(model_dir+'training_histories.npz', [ history.history for history in [ history_cnn ]])
+

@@ -141,7 +141,7 @@ int main(int argc, char **argv)
         hdr->SetEventID(iEvent);
 		//--------Sample randomly from centSamp---------
 		cent = centSamp->GetRandom(); hdr->SetCentrality(cent);
-		ic = 0;//GetCentralityBin(cent);
+		ic = GetCentralityBin(cent);
     	//-----------End of random sampling of centrality-------------
 		jhisto->hCentSample->Fill(ic);
 		Nch=inputNch[ic];
@@ -234,10 +234,9 @@ void NormalizeSample(TH1D *hist)
 		return;
 }
 Int_t GetCentralityBin( Double_t dice) {
-	Int_t ic = -1;
-	if(dice>= 0.0 && dice<0.3) ic=0;
-	if(dice>=0.3 && dice<0.6) ic=1;
-	if(dice>=0.6 && dice<=0.9) ic=2;
-
-	return ic;
+	if(dice <= 0.333)
+		return 0;
+	if(dice <= 0.666)
+		return 1;
+	return 2;
 }

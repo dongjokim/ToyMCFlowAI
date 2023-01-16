@@ -50,6 +50,7 @@ def MyModel(n_features):
                    activation='relu'),
       ### layer output
       Dense(name="output", units=1, activation='relu')
+      #Dense(name="output", units=1, activation='linear')
   ])
 
   model_cnn.summary()
