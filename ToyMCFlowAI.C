@@ -141,7 +141,7 @@ int main(int argc, char **argv)
         hdr->SetEventID(iEvent);
 		//--------Sample randomly from centSamp---------
 		cent = centSamp->GetRandom(); hdr->SetCentrality(cent);
-		ic = GetCentralityBin(cent);
+		ic = 0;//GetCentralityBin(cent);
     	//-----------End of random sampling of centrality-------------
 		jhisto->hCentSample->Fill(ic);
 		Nch=inputNch[ic];
@@ -152,9 +152,14 @@ int main(int argc, char **argv)
 		jflowana->SetSymmetryPlanes(Psi_n);
 		// Setting parameter values of pdf
 		fourier->SetParameter(0,Nch); 
-		for (Int_t i=0; i<NH-1; i++){
+		//https://www.bnl.gov/isd/documents/88233.pdf
+		double v2 = prng->Gaus(inputVn[1][ic],0.2*inputVn[1][ic]);
+		double v3 = prng->Gaus(inputVn[2][ic],0.2*inputVn[2][ic]);
+		/*for (Int_t i=0; i<NH-1; i++){
 			fourier->SetParameter(i+1,inputVn[i][ic]); //Setting the vn parameters
-		}
+		}*/
+		fourier->SetParameter(1,v2);
+		fourier->SetParameter(2,v3);
 		for (Int_t i=NH; i<2*NH; i++){
 			fourier->SetParameter(i+1,Psi_n[i-NH]); //Setting the Psi parameters
 		}
@@ -184,8 +189,8 @@ int main(int argc, char **argv)
 		jevent.eCM  = TMath::Log(5020.);
 		jevent.psi_2  = Psi_n[0];
 		jevent.psi_3  = Psi_n[1];
-		jevent.v_2  = inputVn[1][ic];
-		jevent.v_3  = inputVn[2][ic];
+		jevent.v_2  = v2;//inputVn[1][ic];
+		jevent.v_3  = v3;//inputVn[2][ic];
 
 		for (Int_t t=0; t<phiarray.size(); t++){ 
 			jhisto->hSample->Fill(phiarray[t]); //fill hSample with phiarray following shape of fNUE

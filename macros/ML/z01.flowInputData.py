@@ -3,8 +3,9 @@ import uproot3
 import ROOT
 import pandas as pd
 import numpy as np
-pd.options.plotting.backend = "plotly"
-import plotly.express as px
+import glob
+#pd.options.plotting.backend = "plotly"
+#import plotly.express as px
 #from plotly.subplots import make_subplots
 #import plotly.graph_objs as go
 import matplotlib.pyplot as plt
@@ -75,16 +76,28 @@ def make_image_event(df):
 
 
 if __name__ == "__main__":
-	tree = uproot3.open("../../tree_toymcflowAI_bg0NUE0.root")['vTree']
-	print(tree.keys())
-	#tree.arrays(["phi", "eta", "pt"])
-	df = tree.pandas.df()
-	#print(df)
+	#TODO: IMPLEMENT DATA STREAMER FOR THE TRAINING PROCESS.
+	eventImages = [];
+
+	for fn in glob.glob("../../outputs/*.root")[:1]:
+		tree = uproot3.open(fn)['vTree']
+		df1 = tree.pandas.df();
+		try:
+			df = pd.concat([df,df1],sort=False,copy=False);
+		except NameError:
+			df = df1;
+		print("Loaded {}...".format(fn));
+	
+	print(df.head());
+	print("Rows:",len(df.index));
+
+	exit();
+
 	outdir = 'images_out/'
 	if not os.path.isdir(outdir): os.system('mkdir {}'.format(outdir))
 	cwd = os.getcwd()
 	
-	allimages,trueimages,flowprop  = make_image_event(df)
+	allimages,trueimages,flowprop = make_image_event(df)
 	np.savez_compressed(outdir+'allimages.npz', allimages)
 	np.savez_compressed(outdir+'trueimages.npz', trueimages)
 	np.savez_compressed(outdir+'flowprop.npz', flowprop)
