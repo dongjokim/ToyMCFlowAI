@@ -39,7 +39,7 @@ def MyModel(n_features):
       Dense(name="h", input_dim=n_features,
                    units=int(round((n_features+1)/24)), #128
                    activation='relu'),  
-      ### hidden layer 1
+      #### hidden layer 1
       Dense(name="h1", units=int(round((n_features+1)/12)), #256
                    activation='relu'),
       ### hidden layer 2
@@ -48,9 +48,20 @@ def MyModel(n_features):
       ### hidden layer 3
       Dense(name="h3", units=int(round((n_features+1)/12)), 
                    activation='relu'),
+      #Dense(name="h1", units=256,#int(round((n_features+1)/12)), #256
+      #             activation='relu'),
+      #### hidden layer 2
+      #Dense(name="h2", units=512,#int(round((n_features+1)/12)), 
+      #             activation='relu'),
+      #### hidden layer 3
+      #Dense(name="h3", units=512,#int(round((n_features+1)/12)), 
+      #             activation='relu'),
+      #### hidden layer 3
+      #Dense(name="h4", units=256,#int(round((n_features+1)/12)), 
+      #             activation='relu'),
       ### layer output
-      Dense(name="output", units=1, activation='relu')
-      #Dense(name="output", units=1, activation='linear')
+      #Dense(name="output", units=1, activation='relu')
+      Dense(name="output", units=1, activation='linear')
   ])
 
   model_cnn.summary()

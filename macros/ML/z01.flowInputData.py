@@ -92,7 +92,7 @@ if __name__ == "__main__":
 	except FileExistsError:
 		pass;
 
-	with Pool(processes=8) as p:
+	with Pool(processes=20) as p:
 		for fn in glob.glob("../../outputs/*.root"):
 			p.apply_async(process,args=(fn,));
 		p.close();
