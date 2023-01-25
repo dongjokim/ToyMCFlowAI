@@ -1,4 +1,5 @@
 const int NC = 7; // # of centralities
+const double centBins[NC] = {5.0,10.0,20.0,30.0,40.0,50.0,60.0};
 const TString strCentrality[NC] = {"0-5\%","5-10\%","10-20\%","20-30\%","30-40\%","40-50\%","50-60\%"};
 const float inputNch[NC] ={1943, 1603, 1196, 802, 521, 322, 185};
 const int NH = 3; // # of harmonic orders
