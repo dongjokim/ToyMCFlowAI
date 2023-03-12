@@ -20,6 +20,7 @@
 #include "src/JBaseTrack.h"
 #include "src/JHistos.h"
 #include "src/JFlowAnalysis.h"
+#include "src/JTreeGenerator.h"
 
 const Double_t kEtaMax = 0.8;
 void NormalizeSample(TH1D *hist); //to normalize the inclusive phi histo to match fNUE
@@ -43,40 +44,7 @@ int main(int argc, char **argv)
 	Int_t bNUE = atoi(argv[5]); //if bNUE = false = 0, uses the uniform acceptance for sampling
 	// Declare variables
 	cout<< strCentrality[0]<<endl;
-	TFile *fOutRoot = new TFile(outFile, "RECREATE");
-	TClonesArray *event = new TClonesArray("JBaseEventHeader",1000);
-	TClonesArray *tracks = new TClonesArray("JBaseTrack",1000);
-    TTree *jTree = new TTree("jTree","Tree from ToyMC");
-    jTree->Branch("JTrackList",&tracks);
-    jTree->Branch("JEventHeaderList",&event);
-
-    // Define some simple structures
-    typedef struct {Double_t phi,eta,pt,mass,E,correction;} JTRACKS;
-    typedef struct {
-       Int_t runnumber,event,ntrack,icent;
-       Double_t eCM,psi_2,psi_3,v_2,v_3;
-    } JEVENT;
-    JTRACKS jtracks;
-    JEVENT jevent;
-	TTree *vTree = new TTree("vTree","vTree from ToyMC");
-	//vTree->Branch("jtracks",&jtracks,"phi/D:eta/D:pt/D:E/D:correction/D");
-    //vTree->Branch("jevent",&jevent,"ntrack/I:icent/i:psi_2/D:psi_3/D");
-    vTree->Branch("phi",&jtracks.phi,"phi/D");
-    vTree->Branch("eta",&jtracks.eta,"eta/D");
-    vTree->Branch("pt",&jtracks.pt,"pt/D");
-    vTree->Branch("mass",&jtracks.mass,"mass/D");
-    vTree->Branch("E",&jtracks.E,"E/D");
-    vTree->Branch("correction",&jtracks.correction,"correction/D");
-    vTree->Branch("runnumber",&jevent.event,"runnumber/I");
-    vTree->Branch("event",&jevent.event,"event/I");
-    vTree->Branch("ntrack",&jevent.ntrack,"ntrack/I");
-    vTree->Branch("icent",&jevent.icent,"icent/I");
-    vTree->Branch("eCM",&jevent.eCM,"eCM/D");
-    vTree->Branch("psi_2",&jevent.psi_2,"psi_2/D");
-    vTree->Branch("psi_3",&jevent.psi_3,"psi_3/D");
-    vTree->Branch("v_2",&jevent.v_2,"v_2/D");
-    vTree->Branch("v_3",&jevent.v_3,"v_3/D");
-
+	
 	// pizero spectra from pythia event generator->Levy Para
 	Double_t lpt = 0.15, upt = 70;
 	Double_t par_Lpi14tev_pythia[3] = {2.62912e+04, 6.17808e+00, 5.26791e+00};
@@ -91,8 +59,11 @@ int main(int argc, char **argv)
 	for(UInt_t i = 0; i < vnPDFN; ++i)
 		pgrVnPDF[i] = (TGraphErrors*)pfVnPDF->Get(Form("Table %u/Graph1D_y1",tableId[i]));
 	//-----------------------------Flow ebye pdfs---------------------------------------
-	
-	fOutRoot->cd();
+	// Tree generator
+	 // Open the output file
+    TFile *fOutRoot = new TFile(outFile, "RECREATE");
+	JTreeGenerator *jtreegen = new JTreeGenerator(fOutRoot);
+	jtreegen->GenerateTree();
 
 	JHistos *jhisto = new JHistos();
 	jhisto->CreateQAHistos();
@@ -125,7 +96,6 @@ int main(int argc, char **argv)
 	TRandom3 *prng = new TRandom3(random_seed);
 	gRandom->SetSeed(2*random_seed); //used for GetRandom()
 	//---------------------------End of generating pdfs---------------------------------
-
 	int ieout = Nevt/20;
 	if (ieout<1) ieout=1;
 
@@ -138,13 +108,10 @@ int main(int argc, char **argv)
 
 	//Eventloop to fill hSample
 	for (Int_t iEvent=0; iEvent<Nevt; iEvent++) {
-		event->Clear(); tracks->Clear(); phiarray.clear(); phiarrayWeight.clear();
+		jtreegen->ClearEvent(); phiarray.clear(); phiarrayWeight.clear();
 		if(iEvent % ieout == 0) { cout << iEvent << "\t" << int(float(iEvent)/Nevt*100) << "%" << endl ;}
-        JBaseEventHeader *hdr = new( (*event)[event->GetEntriesFast()] ) JBaseEventHeader;
-        hdr->SetEventID(iEvent);
-
+   
 		double cent = prng->Uniform(0.0,60.0);
-		hdr->SetCentrality(cent);
 		Int_t ic = GetCentralityBin(cent);
 		if(ic < 0)
 			continue;
@@ -177,6 +144,9 @@ int main(int argc, char **argv)
 			fourier->SetParameter(i+1,Psi_n[i-NH]); //Setting the Psi parameters
 		if(iEvent<NPhiHist)
 			fourier->Write(Form("fourierE%02d",iEvent));
+
+		jtreegen->AddEvent(random_seed, iEvent, cent, ic, Nch, Psi_n, v2, v3);
+
 		//Signal
 		for (UInt_t t=0; t<Nch; t++){
 			double phi = fourier->GetRandom();
@@ -194,16 +164,6 @@ int main(int argc, char **argv)
 			if(iEvent<NPhiHist){ jhisto->hBGEvent[iEvent]->Fill(phi); }
 			jhisto->hBgPhi->Fill(phi);
 		}
-		// Signal + background
-		jevent.runnumber = random_seed; // just for MC
-		jevent.event = iEvent;
-		jevent.ntrack = phiarray.size();
-		jevent.icent = ic;
-		jevent.eCM = TMath::Log(5020.);
-		jevent.psi_2 = Psi_n[0];
-		jevent.psi_3 = Psi_n[1];
-		jevent.v_2 = v2;
-		jevent.v_3 = v3;
 
 		for (UInt_t t=0; t<phiarray.size(); t++){ 
 			jhisto->hSample->Fill(phiarray[t]); //fill hSample with phiarray following shape of fNUE
@@ -219,24 +179,16 @@ int main(int argc, char **argv)
 			double py = pt*sin(phiarray[t]);
 			double pz = pt*sinh(eta);
 			double E = sqrt(mass*mass+px*px+py*py+pz*pz);
-			new ( (*tracks)[t] )TLorentzVector(px, py, pz, E);
-			jtracks.phi = phiarray[t];
-			jtracks.eta = eta;
-			jtracks.pt  = pt;
-			jtracks.E   = E;
-			jtracks.mass = mass;
-			jtracks.correction = 1.0;
-			vTree->Fill();
+			jtreegen->AddTrack(t,pz,py,pz,E,phiarray[t],eta,pt,mass);
+			
 		}
 		//jflowana->Run(phiarray, phiarrayWeight);
-		jTree->Fill(); // fill event
+		jtreegen->FillTree(); // fill event
 		
 	}// End of event loop
 
 	NormalizeSample(jhisto->hSample); 
 	fNUE->Write("fNUE");
-	fOutRoot->Write();
-	fOutRoot->Close();
 	delete prng;
 	delete bgUniform;
 	delete fNUE;
@@ -246,11 +198,8 @@ int main(int argc, char **argv)
 	delete pfVnPDF;
 	delete jhisto;
 	delete Lpi14tev_pythia;
-	//delete vTree;
-	//delete jTree;
-	//delete tracks;
-	//delete event;
-	delete fOutRoot;
+	delete jtreegen;
+    delete fOutRoot;
 	cout <<"Successfully finished."<<endl;
 	timer.Print();
 
