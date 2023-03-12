@@ -65,7 +65,6 @@ void JTreeGenerator::AddEvent(Int_t random_seed, int iEvent, double cent, int ic
 	jevent.psi_3 = Psi_n[1];
 	jevent.v_2 = v2;
 	jevent.v_3 = v3;
- 
 }
 
 void JTreeGenerator::AddTrack(int i, double px, double py, double pz, double E,double phi, double eta, double pt, double mass)
