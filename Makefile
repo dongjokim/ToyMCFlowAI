@@ -23,6 +23,7 @@ HDRSDICT = src/JBaseTrack.h src/JBaseEventHeader.h
 HDRS += $(HDRSDICT) src/JTreeDataManager.h \
 	src/JHistos.h \
 	src/JFlowAnalysis.h \
+	src/JTreeGenerator.h \
 	nanoDict.h
 
 SRCS 		= $(HDRS:.h=.cxx)

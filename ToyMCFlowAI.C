@@ -164,7 +164,6 @@ for (Int_t iEvent=0; iEvent<Nevt; iEvent++) {
 		if(iEvent<NPhiHist){ jhisto->hBGEvent[iEvent]->Fill(phi); }
 		jhisto->hBgPhi->Fill(phi);
 	}
-
 	for (UInt_t t=0; t<phiarray.size(); t++){ 
 		jhisto->hSample->Fill(phiarray[t]); //fill hSample with phiarray following shape of fNUE
 		jhisto->hSignalPhi->Fill(phiarray[t]); 
@@ -189,6 +188,7 @@ for (Int_t iEvent=0; iEvent<Nevt; iEvent++) {
 
 NormalizeSample(jhisto->hSample); 
 fNUE->Write("fNUE");
+jtreegen->WriteTree();
 delete prng;
 delete bgUniform;
 delete fNUE;

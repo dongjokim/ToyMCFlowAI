@@ -24,8 +24,8 @@ void JTreeGenerator::GenerateTree()
         return;
     }
     fOutRoot->cd();
-	event = new TClonesArray("JBaseEventHeader",1000);
-	tracks = new TClonesArray("JBaseTrack",1000);
+	event = new TClonesArray("JBaseEventHeader",10000);
+	tracks = new TClonesArray("JBaseTrack",10000);
     jTree = new TTree("jTree","Tree from ToyMC");
     jTree->Branch("JTrackList",&tracks);
     jTree->Branch("JEventHeaderList",&event);
@@ -51,10 +51,7 @@ void JTreeGenerator::GenerateTree()
 
 void JTreeGenerator::AddEvent(Int_t random_seed, int iEvent, double cent, int ic, int Ntrk, double Psi_n[2], double v2, double v3)
 {
-    JBaseEventHeader *hdr = new( (*event)[event->GetEntriesFast()] ) JBaseEventHeader;
-    hdr->SetEventID(iEvent);
-    hdr->SetCentrality(cent);
-    new ( (*event)[iEvent] )JBaseEventHeader();
+    new ( (*event)[iEvent] )JBaseEventHeader(iEvent,cent,0.1);
 
 	jevent.runnumber = random_seed; // just for MC
 	jevent.event = iEvent;
@@ -77,15 +74,24 @@ void JTreeGenerator::AddTrack(int i, double px, double py, double pz, double E,d
 	jtracks.mass = mass;
 	jtracks.correction = 1.0;
 }
+
 void JTreeGenerator::FillTree()
-{
+{    
+    if (!fOutRoot) {
+        cout << "Error: Cannot open input file " << fOutRoot << endl;
+        return;
+    }
     fOutRoot->cd();
-    jTree->Fill();
+    // jTree->Fill();
     vTree->Fill();
 }   
 void JTreeGenerator::WriteTree()
 {
+    if (!fOutRoot) {
+        cout << "Error: Cannot open input file " << fOutRoot << endl;
+        return;
+    }
     fOutRoot->cd();
-    jTree->Write();
+    // jTree->Write();
     vTree->Write();
 }
