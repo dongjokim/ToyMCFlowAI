@@ -51,7 +51,10 @@ void JTreeGenerator::GenerateTree()
 
 void JTreeGenerator::AddEvent(Int_t random_seed, int iEvent, double cent, int ic, int Ntrk, double Psi_n[2], double v2, double v3)
 {
-    new ( (*event)[iEvent] )JBaseEventHeader(iEvent,cent,0.1);
+    //new ( (*event)[iEvent] )JBaseEventHeader(iEvent,cent,0.1);
+    JBaseEventHeader *hdr = new( (*event)[event->GetEntriesFast()] ) JBaseEventHeader;
+    hdr->SetEventID(iEvent);
+    hdr->SetCentrality(cent);
 
 	jevent.runnumber = random_seed; // just for MC
 	jevent.event = iEvent;
@@ -82,7 +85,7 @@ void JTreeGenerator::FillTree()
         return;
     }
     fOutRoot->cd();
-    // jTree->Fill();
+    jTree->Fill();
     vTree->Fill();
 }   
 void JTreeGenerator::WriteTree()
@@ -92,6 +95,6 @@ void JTreeGenerator::WriteTree()
         return;
     }
     fOutRoot->cd();
-    // jTree->Write();
+    jTree->Write();
     vTree->Write();
 }
