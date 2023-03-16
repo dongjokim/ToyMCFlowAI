@@ -14,7 +14,7 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <vector>
-//#include "include/toyflowinputs.h"
+// #include "include/toyflowinputs.h"
 #include <TSystem.h> 
 #include "src/JBaseEventHeader.h"
 #include "src/JBaseTrack.h"
@@ -65,12 +65,17 @@ TFile *fOutRoot = new TFile(outFile, "RECREATE");
 JTreeGenerator *jtreegen = new JTreeGenerator(fOutRoot);
 jtreegen->GenerateTree();
 
+JFlowInput *jinput = new JFlowInput();
+jinput->LoadAliceData();
+JPDF *jpdf = new JPDF(jinput);
+jpdf->JCreatePDF(); 
+
 JHistos *jhisto = new JHistos();
 jhisto->CreateQAHistos();
 jhisto->CreateFlowHistos();
 
 JFlowAnalysis *jflowana = new JFlowAnalysis();
-jflowana->RegisterHistos(jhisto);
+jflowana->RegisterHistos(jhisto); // connect jflowana to jhisto with pointer
 //-----------------------------Generating pdfs--------------------------------------
 //signal
 TString strformula = "[0]*(1";
@@ -104,6 +109,7 @@ timer.Start();
 
 const double mass = 0.139;
 Double_t Psi_n[NH]={0.0};// symmetry plane angles for each n
+Double_t v_n[NH]={0.0};
 vector <Double_t> phiarray, phiarrayWeight; //pharray is now vector
 
 //Eventloop to fill hSample
@@ -115,37 +121,19 @@ for (Int_t iEvent=0; iEvent<Nevt; iEvent++) {
 	Int_t ic = GetCentralityBin(cent);
 	if(ic < 0)
 		continue;
-	
+	 
 	jhisto->hCentSample->Fill(ic);
 	UInt_t Nch=inputNch[ic];
-	//Get Psi for different harmonics
-	for (UInt_t n=0; n<NH; n++)
-		Psi_n[n] = prng->Uniform(-TMath::Pi()/(double)(n+1),TMath::Pi()/(double)(n+1)); //uniform[n]->GetRandom();//harmonic loop
 	// Event information for jflowana
 	jflowana->SetCentBin(ic);
 	jflowana->SetSymmetryPlanes(Psi_n);
-	// Setting parameter values of pdf
-	fourier->SetParameter(0,Nch); 
-
-	UInt_t vnPDFCentIndex = (UInt_t)(cent/5.0); //vn PDF is provided in bins of 5, convert the centrality to that range
-	TF1 f("vnebye",[&](double *px, double *pp)->double{
-		return TMath::Max(pgrVnPDF[vnPDFCentIndex]->Eval(px[0]),0.0);
-	},0.0,2.5,0);
-
-	//double v2 = prng->Gaus(inputVn[1][ic],0.01*inputVn[1][ic]); //small sigma 0.01, large 0.3
-	double v2 = f.GetRandom()*inputVn[1][ic];
-	double v3 = prng->Gaus(inputVn[2][ic],0.01*inputVn[2][ic]);
-	/*for (Int_t i=0; i<NH-1; i++){
-		fourier->SetParameter(i+1,inputVn[i][ic]); //Setting the vn parameters
-	}*/
-	fourier->SetParameter(1,v2);
-	fourier->SetParameter(2,v3);
-	for (UInt_t i=NH; i<2*NH; i++)
-		fourier->SetParameter(i+1,Psi_n[i-NH]); //Setting the Psi parameters
+	
+	jpdf->JGeneratePDF(prng);
+	
 	if(iEvent<NPhiHist)
 		fourier->Write(Form("fourierE%02d",iEvent));
 
-	jtreegen->AddEvent(random_seed, iEvent, cent, ic, Nch, Psi_n, v2, v3);
+	jtreegen->AddEvent(random_seed, iEvent, cent, ic, Nch, Psi_n, v_n[1], v_n[2]);
 
 	//Signal
 	for (UInt_t t=0; t<Nch; t++){

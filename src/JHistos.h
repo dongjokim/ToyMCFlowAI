@@ -17,7 +17,7 @@
 #include <TFile.h>
 #include <TClonesArray.h>
 #include <TFormula.h>
-#include "../include/toyflowinputs.h"
+#include "toyflowinputs.h"
 
 const int NPhiHist = 12; // Number of events for event-by-event phi dist.
 

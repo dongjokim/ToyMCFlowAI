@@ -24,6 +24,8 @@ HDRS += $(HDRSDICT) src/JTreeDataManager.h \
 	src/JHistos.h \
 	src/JFlowAnalysis.h \
 	src/JTreeGenerator.h \
+	src/JPDF.h \
+	src/JFlowInput.h \
 	nanoDict.h
 
 SRCS 		= $(HDRS:.h=.cxx)
