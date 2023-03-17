@@ -1,8 +1,8 @@
 //===========================================================
 // JFlowInput.h
 //===========================================================
-
-#define JFlowInput_H
+#ifndef JFLOWINPUT_H
+#define JFLOWINPUT_H
 
 #include <iostream>
 #include <fstream>
@@ -12,7 +12,6 @@
 #include <fstream>
 #include <stdlib.h>
 #include <stdio.h>
-
 #include <TFile.h>
 #include <TTree.h>
 #include <TClonesArray.h>
@@ -35,3 +34,5 @@ class JFlowInput {
 		TGraphErrors *pgrVnPDF[vnPDFN];
 		
 };
+
+#endif

@@ -1,7 +1,7 @@
-    
 #include "JTreeGenerator.h"
 #include "JBaseEventHeader.h"
 #include "JBaseTrack.h"
+
 // Define some simple structures
 typedef struct {Double_t phi,eta,pt,mass,E,correction;} JTRACKS;
 typedef struct {
@@ -49,7 +49,7 @@ void JTreeGenerator::GenerateTree()
     vTree->Branch("v_3",&jevent.v_3,"v_3/D");
 }
 
-void JTreeGenerator::AddEvent(Int_t random_seed, int iEvent, double cent, int ic, int Ntrk, double Psi_n[2], double v2, double v3)
+void JTreeGenerator::AddEvent(Int_t random_seed, int iEvent, double cent, int ic, int Ntrk, double Psi_n[3], double v2, double v3)
 {
     //new ( (*event)[iEvent] )JBaseEventHeader(iEvent,cent,0.1);
     JBaseEventHeader *hdr = new( (*event)[event->GetEntriesFast()] ) JBaseEventHeader;
@@ -61,8 +61,8 @@ void JTreeGenerator::AddEvent(Int_t random_seed, int iEvent, double cent, int ic
 	jevent.ntrack = Ntrk;
 	jevent.icent = ic;
 	jevent.eCM = TMath::Log(5020.);
-	jevent.psi_2 = Psi_n[0];
-	jevent.psi_3 = Psi_n[1];
+	jevent.psi_2 = Psi_n[1];
+	jevent.psi_3 = Psi_n[2];
 	jevent.v_2 = v2;
 	jevent.v_3 = v3;
 }

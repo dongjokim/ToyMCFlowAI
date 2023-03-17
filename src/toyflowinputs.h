@@ -1,3 +1,6 @@
+#ifndef JTreeGenerator_H
+#define JTreeGenerator_H
+
 const int NC = 7; // # of centralities
 const double centBins[NC] = {5.0,10.0,20.0,30.0,40.0,50.0,60.0};
 const TString strCentrality[NC] = {"0-5\%","5-10\%","10-20\%","20-30\%","30-40\%","40-50\%","50-60\%"};
@@ -16,3 +19,5 @@ const double inputVn[NH][NC] = {
     {0.001957285518962443,0.005921264409071094,0.0052407396041462785},
     {0.0008972314477330478,0.0027143431996458607,0.0024023865382260113},*/
 };
+
+#endif
