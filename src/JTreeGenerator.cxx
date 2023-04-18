@@ -76,6 +76,7 @@ void JTreeGenerator::AddTrack(int i, double px, double py, double pz, double E,d
 	jtracks.E   = E;
 	jtracks.mass = mass;
 	jtracks.correction = 1.0;
+    vTree->Fill();
 }
 
 void JTreeGenerator::FillTree()
@@ -86,7 +87,7 @@ void JTreeGenerator::FillTree()
     }
     fOutRoot->cd();
     jTree->Fill();
-    vTree->Fill();
+    // vTree->Fill();
 }   
 void JTreeGenerator::WriteTree()
 {

@@ -2,7 +2,6 @@
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TLegend.h"
-#include "TRandom3.h"
 #include "TH1.h"
 #include "TROOT.h"
 #include "TGraphErrors.h"
@@ -60,7 +59,8 @@ jtreegen->GenerateTree();
 JFlowInput *jinput = new JFlowInput();
 jinput->LoadAliceData();
 JPDF *jpdf = new JPDF(jinput);
-jpdf->CreatePDF(); 
+jpdf->CreatePDF();
+fOutRoot->cd();
 
 JHistos *jhisto = new JHistos();
 jhisto->CreateQAHistos();
@@ -90,6 +90,7 @@ timer.Start();
 const double mass = 0.139;
 vector <Double_t> phiarray, phiarrayWeight; //pharray is now vector
 Double_t v_n[NH] = {0.0,0.0,0.0};
+Double_t* pvn;
 //Eventloop to fill hSample
 for (Int_t iEvent=0; iEvent<Nevt; iEvent++) {
 	jtreegen->ClearEvent(); phiarray.clear(); phiarrayWeight.clear();
@@ -110,7 +111,11 @@ for (Int_t iEvent=0; iEvent<Nevt; iEvent++) {
 	jflowana->SetCentBin(ic);
 	jflowana->SetSymmetryPlanes(jpdf->GetSymmetryPlanes());
 	
-	//v_n = jpdf->GetVn();
+	pvn = jpdf->GetVn();
+	for (UInt_t i = 0; i<(NH);i++) {
+		v_n[i] = *(pvn+i);
+	}
+
 	if(iEvent<NPhiHist)
 		fourier->Write(Form("fourierE%02d",iEvent));
 

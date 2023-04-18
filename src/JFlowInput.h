@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
+#include "TRandom3.h"
+#include "TF1.h"
 
 #include <iostream>
 #include <fstream>
@@ -27,10 +29,17 @@ class JFlowInput {
 		virtual ~JFlowInput(){;}	  //destructor
 
 		void LoadAliceData();
+		Double_t GetRandomV2(TRandom3 *rng, UInt_t ic);
 
 
 	public:
+		UInt_t randint;
+		Double_t v2;
+		Double_t xmin;
+		Double_t xmax;
 
+		TF1 *f1;
+		TGraphErrors *temp_pdf;
 		TGraphErrors *pgrVnPDF[vnPDFN];
 		
 };
