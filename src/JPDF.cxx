@@ -31,9 +31,9 @@ void JPDF::GeneratePDF(TRandom3 *random, UInt_t ic)
     fpdf->SetParameter(0,inputNch[ic]);
     for (UInt_t n=0; n<NH; n++)
 		Psi_n[n] = random->Uniform(-TMath::Pi()/(double)(n+1),TMath::Pi()/(double)(n+1)); //uniform[n]->GetRandom();//harmonic loop
-	// v_n[1] = jinput->GetRandomV2(random, ic)*inputVn[1][ic];
-    v_n[1] = random->Gaus(inputVn[1][ic],0.01*inputVn[1][ic]);
-	v_n[2] = random->Gaus(inputVn[2][ic],0.01*inputVn[2][ic]);
+	// v_n[1] = jinput->GetRandomV2(random, ic)*inputVn[1][ic]; // Fix warnings (Maxim)
+    v_n[1] = random->Gaus(inputVn[1 ][ic],0.1*inputVn[1][ic]);
+	v_n[2] = random->Gaus(inputVn[2][ic],0.1*inputVn[2][ic]);
 
     fpdf->SetParameter(1,v_n[1]); 
     fpdf->SetParameter(2,v_n[2]); 

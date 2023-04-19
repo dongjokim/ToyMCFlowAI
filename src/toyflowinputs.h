@@ -8,6 +8,7 @@ const float inputNch[NC] ={1943, 1603, 1196, 802, 521, 322, 185};
 const int NH = 3; // # of harmonic orders
 //rows: input vn from n=2 to n=7
 //cols: vn for multiplicities from central to peripheral
+// mean value of vn, needs to be combined with the fluctuations
 const double inputVn[NH][NC] = {
 	{0.,0.,0.,0.,0.,0.,0.},
 	{0.0279896,0.0449772,0.0645474,0.0839821,0.0959965,0.10125,0.0988201},

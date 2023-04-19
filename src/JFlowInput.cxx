@@ -6,7 +6,7 @@ JFlowInput::JFlowInput(){   // constructor
     
 }
 
-void JFlowInput::LoadAliceData()
+void JFlowInput::LoadAliceData() // This will load the fluctuation graphs
 {
     TFile *pfVnPDF = new TFile("HEPData-ins1666817-v1-root.root","read");
     
@@ -14,6 +14,7 @@ void JFlowInput::LoadAliceData()
 	   pgrVnPDF[i] = (TGraphErrors*)pfVnPDF->Get(Form("Table %u/Graph1D_y1",tableId[i]));   
 }
 
+// Create random v2 fluctuation based on ALICE data
 Double_t JFlowInput::GetRandomV2(TRandom3 *rng, UInt_t ic) {
     if (ic < 2) {
         temp_pdf = pgrVnPDF[ic]; 

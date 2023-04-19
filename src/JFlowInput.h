@@ -18,8 +18,9 @@
 #include <TTree.h>
 #include <TClonesArray.h>
 #include <TGraphErrors.h>
-#include "toyflowinputs.h"
+#include "toyflowinputs.h" // mean vn stored here
 
+// Fluctuation tables
 const UInt_t tableId[] = {223,220,224,225,226,221,227,228,229,222,230,231}; //indexing table because the HEPdata table order was messed up by its author
 const UInt_t vnPDFN = sizeof(tableId)/sizeof(tableId[0]);
 

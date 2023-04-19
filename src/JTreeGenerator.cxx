@@ -69,14 +69,14 @@ void JTreeGenerator::AddEvent(Int_t random_seed, int iEvent, double cent, int ic
 
 void JTreeGenerator::AddTrack(int i, double px, double py, double pz, double E,double phi, double eta, double pt, double mass)
 {
-    new ( (*tracks)[i] )TLorentzVector(px, py, pz, E);
+    new ( (*tracks)[i] )TLorentzVector(px, py, pz, E); // No fill needed every track
 	jtracks.phi = phi;
 	jtracks.eta = eta;
 	jtracks.pt  = pt;
 	jtracks.E   = E;
 	jtracks.mass = mass;
 	jtracks.correction = 1.0;
-    vTree->Fill();
+    vTree->Fill(); // Needed to fill vTree 
 }
 
 void JTreeGenerator::FillTree()
